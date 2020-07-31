@@ -1,0 +1,9 @@
+---
+# Versions
+vault_version: "1.5.0"
+# Download dirs
+tmp_dir: "/tmp"
+bin_dir: "/usr/local/bin"
+# vault
+vault_url: "https://releases.hashicorp.com/vault/{{ vault_version }}/vault_{{ vault_version }}_linux_amd64.zip"
+vault_dest: "{{ tmp_dir }}/vault_{{ vault_version }}_linux_amd64.zip"

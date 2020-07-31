@@ -14,12 +14,19 @@ if [[ -z "${IVY}" ]]; then
     return 255
 fi
 
+function get_mdsv2() {
+    # Got from https://github.com/aws-quickstart/quickstart-hashicorp-vault/blob/master/scripts/functions.sh#L34-L37
+    local PARAMETER="${1}"
+    local TOKEN="$(curl -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600" 2>/dev/null)"
+    echo $(curl --retry 3 --silent --fail -H "X-aws-ec2-metadata-token: ${TOKEN}" "http://169.254.169.254/latest/meta-data/${PARAMETER}" 2>/dev/null)
+}
+
 function get_instance_id() {
-    echo $(curl --retry 3 --silent --fail http://169.254.169.254/latest/meta-data/instance-id)
+    echo $(get_mdsv2 'instance-id')
 }
 
 function get_availability_zone() {
-    echo $(curl --retry 3 --silent --fail http://169.254.169.254/latest/meta-data/placement/availability-zone)
+    echo $(get_mdsv2 'placement/availability-zone')
 }
 
 function get_region() {
@@ -238,4 +245,19 @@ EOF
 
     aws route53 change-resource-record-sets --hosted-zone-id ${HOSTED_ZONE_ID} --change-batch file://${TXN_FILE}
     rm -f ${TXN_FILE}
+}
+
+function get_ssm_param() {
+    local REGION="$(get_region)"
+    local PARAMETER_NAME="${1}"
+    local EXTRA_AWS_CLI_PARAMS="${2:-''}"
+    local VALUE=$(aws ssm get-parameter --region "${REGION}" --name "${PARAMETER_NAME}" ${EXTRA_AWS_CLI_PARAMS}| jq -r ".Parameter|.Value" )
+    echo ${VALUE}
+}
+
+function get_secret() {
+    local REGION=$(get_region)
+    local SECRET_ID="${1}"
+    local VALUE=$(aws secretsmanager --region "${REGION}" get-secret-value --secret-id "${SECRET_ID}" | jq --raw-output .SecretString)
+    echo ${VALUE}
 }

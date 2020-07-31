@@ -28,8 +28,5 @@
 
 - include: consul.yml
 
-# skip vault for now
-#- include: vault.yml
-
 - name: copy init files
   copy: src=etc/systemd/system/ dest=/etc/systemd/system/
