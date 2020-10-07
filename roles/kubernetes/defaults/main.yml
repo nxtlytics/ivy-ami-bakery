@@ -1,0 +1,39 @@
+---
+# Versions
+etcd_version: "v3.4.9"
+cfssl_version: "1.4.1"
+kubernetes_version: "v1.18.5"
+containerd_version: "1.3.4"
+cni_plugins_version: "v0.8.6"
+# Download dirs
+tmp_dir: "/tmp"
+bin_dir: "/usr/local/bin"
+# ETCD
+etcd_url: "https://github.com/etcd-io/etcd/releases/download/{{ etcd_version }}/etcd-{{ etcd_version }}-linux-amd64.tar.gz"
+etcd_dest: "{{ tmp_dir }}/etcd-{{ etcd_version }}-linux-amd64.tar.gz"
+# cfssl
+cfssl_url: "https://github.com/cloudflare/cfssl/releases/download/v{{ cfssl_version }}/cfssl_{{ cfssl_version }}_linux_amd64"
+cfssl_dest: "{{ bin_dir }}/cfssl"
+cfssljson_url: "https://github.com/cloudflare/cfssl/releases/download/v{{ cfssl_version }}/cfssljson_{{ cfssl_version }}_linux_amd64"
+cfssljson_dest: "{{ bin_dir }}/cfssljson"
+# Kubernetes URL
+kubernetes_base_url: "https://storage.googleapis.com/kubernetes-release/release"
+# kubernetes master
+kubernetes_api_url: "{{ kubernetes_base_url }}/{{ kubernetes_version }}/bin/linux/amd64/kube-apiserver"
+kubernetes_api_dest: "{{ bin_dir }}/kube-apiserver"
+kubernetes_controller_manager_url: "{{ kubernetes_base_url }}/{{ kubernetes_version }}/bin/linux/amd64/kube-controller-manager"
+kubernetes_controller_manager_dest: "{{ bin_dir }}/kube-controller-manager"
+kubernetes_scheduler_url: "{{ kubernetes_base_url }}/{{ kubernetes_version }}/bin/linux/amd64/kube-scheduler"
+kubernetes_scheduler_dest: "{{ bin_dir }}/kube-scheduler"
+# kubernetes worker
+kubernetes_proxy_url: "{{ kubernetes_base_url }}/{{ kubernetes_version }}/bin/linux/amd64/kube-proxy"
+kubernetes_proxy_dest: "{{ bin_dir }}/kube-proxy"
+kubelet_url: "{{ kubernetes_base_url }}/{{ kubernetes_version }}/bin/linux/amd64/kubelet"
+kubelet_dest: "{{ bin_dir }}/kubelet"
+# all kubernetes hosts
+kubectl_url: "{{ kubernetes_base_url }}/{{ kubernetes_version }}/bin/linux/amd64/kubectl"
+kubectl_dest: "{{ bin_dir }}/kubectl"
+containerd_url: "https://storage.googleapis.com/cri-containerd-release/cri-containerd-{{ containerd_version }}.linux-amd64.tar.gz"
+containerd_dest: "{{ tmp_dir }}/cri-containerd-{{ containerd_version }}.linux-amd64.tar.gz"
+cni_plugins_url: "https://github.com/containernetworking/plugins/releases/download/{{ cni_plugins_version }}/cni-plugins-linux-amd64-{{ cni_plugins_version }}.tgz"
+cni_plugins_dest: "{{ tmp_dir }}/cni-plugins-linux-amd64-{{ cni_plugins_version }}.tgz"

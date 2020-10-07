@@ -318,3 +318,26 @@ function get_secret() {
     local VALUE=$(aws secretsmanager --region "${REGION}" get-secret-value --secret-id "${SECRET_ID}" | jq --raw-output .SecretString)
     echo ${VALUE}
 }
+
+function trust_sysenv_ca() {
+    local DISTRO="$(grep '^NAME=' /etc/os-release | cut -d '"' -f2)"
+    local SSM_CA_CERTIFICATE="/$(get_ivy_tag)/$(get_environment)/CA/ca.pem"
+    local REGION="${1:-$(get_region)}"
+    case "${DISTRO}" in
+      Amazon Linux)
+      local CA_TRUST_DIR='/etc/pki/ca-trust/source/anchors/'
+      local UPDATE_CA_COMMAND='update-ca-trust extract'
+      ;;
+      Ubuntu)
+      local CA_TRUST_DIR='/usr/local/share/ca-certificates/'
+      local UPDATE_CA_COMMAND='update-ca-certificates'
+      ;;
+      *)
+      echo "Only Amazon Linux and Ubuntu are supported at the moment" >&2
+      return 1
+      ;;
+    esac
+    local CA_CRT="${CA_TRUST_DIR}/ivy.pem"
+    get_ssm_param "${SSM_CA_CERTIFICATE}" "${REGION}" > "${CA_CRT}"
+    sudo ${UPDATE_CA_COMMAND}
+}

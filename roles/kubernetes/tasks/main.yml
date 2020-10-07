@@ -1,0 +1,100 @@
+---
+# Use specific install tasks for each OS family
+- include: "{{ ansible_distribution }}.yml"
+
+- name: install utilities
+  yum:
+    name:
+      - bridge-utils
+      - btrfs-progs-devel
+      - lvm2-devel
+      - nfs-utils
+      - conntrack-tools
+      - ipset
+    state: latest
+    enablerepo: epel
+
+- name: download kubernetes dependencies
+  get_url:
+    url: "{{ item.url }}"
+    dest: "{{ item.dest }}"
+    mode: 0755
+  loop:
+    - { url: "{{ etcd_url }}", dest: "{{ etcd_dest }}" }
+    - { url: "{{ cfssl_url }}", dest: "{{ cfssl_dest }}" }
+    - { url: "{{ cfssljson_url }}", dest: "{{ cfssljson_dest }}" }
+    - { url: "{{ kubernetes_api_url }}", dest: "{{ kubernetes_api_dest }}" }
+    - { url: "{{ kubernetes_controller_manager_url }}", dest: "{{ kubernetes_controller_manager_dest }}" }
+    - { url: "{{ kubernetes_scheduler_url }}", dest: "{{ kubernetes_scheduler_dest }}" }
+    - { url: "{{ kubernetes_proxy_url }}", dest: "{{ kubernetes_proxy_dest }}" }
+    - { url: "{{ kubelet_url }}", dest: "{{ kubelet_dest }}" }
+    - { url: "{{ kubectl_url }}", dest: "{{ kubectl_dest }}" }
+    - { url: "{{ containerd_url }}", dest: "{{ containerd_dest }}" }
+    - { url: "{{ cni_plugins_url }}", dest: "{{ cni_plugins_dest }}" }
+
+- name: create kubernetes, etcd, cni and containerd directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+    recurse: yes
+  loop:
+    - /etc/etcd
+    - /etc/cni/net.d
+    - /etc/kubernetes/config
+    - /opt/cni/bin
+    - /var/lib/etcd
+    - /var/lib/kubelet
+    - /var/lib/kube-proxy
+    - /var/lib/kubernetes
+    - /var/run/kubernetes
+    - /opt/ivy/kubernetes
+
+- name: extract files and place it on /tmp
+  unarchive:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}/"
+    remote_src: yes
+  loop:
+    - { src: "{{ etcd_dest }}", dest: "{{ tmp_dir }}" }
+    - { src: "{{ containerd_dest }}", dest: "{{ tmp_dir }}" }
+    - { src: "{{ cni_plugins_dest }}", dest: "/opt/cni/bin/" }
+
+- name: copy etcd and runc binaries to PATH
+  copy:
+    src: "{{ item }}"
+    dest: "{{ bin_dir }}"
+    mode: 0755
+    remote_src: yes
+  loop:
+    - "{{ tmp_dir }}/etcd-{{ etcd_version }}-linux-amd64/etcd"
+    - "{{ tmp_dir }}/etcd-{{ etcd_version }}-linux-amd64/etcdctl"
+    - "{{ tmp_dir }}/usr/local/sbin/runc"
+
+- name: copy containerd binaries to PATH
+  copy:
+    src: "{{ item }}"
+    dest: "{{ bin_dir }}"
+    mode: 0755
+    remote_src: yes
+  with_fileglob:
+    - "{{ tmp_dir }}/usr/local/bin/*"
+
+- name: copy shell scripts
+  copy:
+    src: "{{ item }}"
+    dest: "/{{ item }}"
+    mode: 0755
+  loop:
+    - usr/local/bin/etcdctl.sh
+    - etc/etcd/etcdctl.env
+
+- name: copy kubernetes ivy scripts
+  copy:
+    src: "{{ item }}"
+    dest: "/{{ item }}"
+    mode: 0755
+  with_fileglob:
+    - opt/ivy/kubernetes/*

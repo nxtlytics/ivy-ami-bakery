@@ -1,0 +1,6 @@
+---
+- name: Copying systemd cilium BPFFS mount
+  copy:
+    src: "etc/systemd/system/sys-fs-bpf.mount"
+    dest: "/etc/systemd/system/sys-fs-bpf.mount"
+    mode: 0755
