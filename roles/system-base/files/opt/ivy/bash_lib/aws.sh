@@ -82,10 +82,25 @@ function get_eni_private_dns_name() {
            --output text)
 }
 
+function get_eni_interface() {
+    local ENI_ID="${1}"
+    local REGION="$(get_region)"
+    local ENI_FILE=$(mktemp -t -u "ENI.XXXX.json")
+    echo "$(aws ec2 describe-network-interfaces --region ${REGION} --network-interface-ids ${ENI_ID} --query 'NetworkInterfaces[0]' --output json)" &> "${ENI_FILE}"
+    local ENI_STATUS="$(jq -r '.Status' ${ENI_FILE})"
+    if [[ "${ENI_STATUS}" != 'in-use' ]]; then
+      return 1
+    fi
+    local MAC_ADDRESS="$(jq -r '.MacAddress' ${ENI_FILE})"
+    rm -f "${ENI_FILE}"
+    echo "$(ip -o link | awk '$2 != "lo:" {print $2, $(NF-2)}' | grep -m 1 "${MAC_ADDRESS}" | cut -d ':' -f1)"
+}
+
 function attach_eni() {
     local INSTANCE_ID=$1
     local ENI_ID=$2
 
+    local OLD_INTERFACE=$(get_default_interface)
     local REGION=$(get_region)
     local ENI_IP=$(get_eni_ip ${ENI_ID})
     local status=$(aws ec2 describe-network-interfaces --region ${REGION} \
@@ -119,21 +134,23 @@ function attach_eni() {
         sleep 1
     done
 
-    until /sbin/ip link show dev eth1 &>/dev/null; do
+    local NEW_INTERFACE=$(get_eni_interface ${ENI_ID})
+
+    until /sbin/ip link show dev ${NEW_INTERFACE} &>/dev/null; do
         sleep 1
     done
 
     echo "Attachment: region=${REGION}, instance-id=${INSTANCE_ID}, eni=${ENI_ID}"
 
-    until [ "$(</sys/class/net/eth1/operstate)" == "up" ]; do
+    until [ "$(</sys/class/net/${NEW_INTERFACE}/operstate)" == "up" ]; do
         sleep 1
     done
 
-    sed -i -e 's/ONBOOT=yes/ONBOOT=no/' /etc/sysconfig/network-scripts/ifcfg-eth0
-    sed -i -e 's/BOOTPROTO=dhcp/BOOTPROTO=none/' /etc/sysconfig/network-scripts/ifcfg-eth0
-    ifdown eth0
-    sed -e 's/eth0/eth1/g' /etc/sysconfig/network-scripts/route-eth0 >> /etc/sysconfig/network-scripts/route-eth1
-    echo > /etc/sysconfig/network-scripts/route-eth0
+    sed -i -e 's/ONBOOT=yes/ONBOOT=no/' "/etc/sysconfig/network-scripts/ifcfg-${OLD_INTERFACE}"
+    sed -i -e 's/BOOTPROTO=dhcp/BOOTPROTO=none/' "/etc/sysconfig/network-scripts/ifcfg-${OLD_INTERFACE}"
+    ifdown "${OLD_INTERFACE}"
+    sed -e "s/${OLD_INTERFACE}/${NEW_INTERFACE}/g" "/etc/sysconfig/network-scripts/route-${OLD_INTERFACE}" >> "/etc/sysconfig/network-scripts/route-${NEW_INTERFACE}"
+    echo > "/etc/sysconfig/network-scripts/route-${OLD_INTERFACE}"
     service network restart
 
 }
