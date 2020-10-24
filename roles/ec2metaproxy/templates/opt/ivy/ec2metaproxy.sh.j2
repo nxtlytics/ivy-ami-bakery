@@ -13,6 +13,6 @@ docker run -d \
     --restart always \
     -v /var/run/docker.sock:/var/run/docker.sock \
     --name=ec2metaproxy \
-    ec2metaproxy:latest "$@"
+    {{ ec2metaproxy_docker_image }} "$@"
 
 bash /opt/ec2metaproxy/setup_iptables.sh
