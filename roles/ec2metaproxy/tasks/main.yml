@@ -18,8 +18,6 @@
 
 - name: copy ec2metaproxy.sh scripts
   template:
-    src: "opt/ivy/{{ item.src }}"
-    dest: "/opt/ivy/{{ item.dest }}"
+    src: opt/ivy/ec2metaproxy.sh.j2
+    dest: /opt/ivy/ec2metaproxy.sh
     mode: 0755
-  loop:
-    - { src: 'ec2metaproxy.sh.j2', dest: 'ec2metaproxy.sh' }
