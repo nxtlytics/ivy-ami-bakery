@@ -1,0 +1,68 @@
+---
+- name: create vault group
+  group:
+    name: vault
+
+- name: create vault user and make vault its primary group
+  user:
+    name: vault
+    group: vault
+    system: yes
+    comment: Hashicorp vault user
+    home: /srv/vault
+    shell: /bin/false
+
+- name: disable core dumps
+  shell: |
+    echo 'ulimit -c 0 > /dev/null 2>&1' > /etc/profile.d/disable-coredumps.sh
+
+- name: Adjusting ulimits for vault user
+  pam_limits:
+    domain: vault
+    limit_type: "{{ item.type }}"
+    limit_item: "{{ item.item }}"
+    value: 65536
+  loop:
+    - { type: "soft", item: "nofile" }
+    - { type: "hard", item: "nofile" }
+    - { type: "soft", item: "nproc" }
+    - { type: "hard", item: "nproc" }
+
+- name: download vault
+  get_url:
+    url: "{{ item.url }}"
+    dest: "{{ item.dest }}"
+    mode: 0755
+  loop:
+    - { url: "{{ vault_url }}", dest: "{{ vault_dest }}" }
+
+- name: extract vault and place it on PATH
+  unarchive:
+    src: "{{ vault_dest }}"
+    dest: "{{ bin_dir }}/"
+    remote_src: yes
+
+- name: change vault ownership, group and permissions
+  file:
+    path: "{{ bin_dir }}/vault"
+    owner: vault
+    group: vault
+    mode: 0755
+
+- name: copy vault systemd unit
+  copy:
+    src: etc/systemd/system/vault.service
+    dest: /etc/systemd/system/vault.service
+    mode: 0644
+
+
+- name: create vault config directory
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: vault
+    group: vault
+    mode: 0755
+  loop:
+    - /etc/vault.d
+    - /var/log/vault

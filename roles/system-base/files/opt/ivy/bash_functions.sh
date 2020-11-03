@@ -23,6 +23,12 @@ function get_ivy_tag() {
     fi
 }
 
+function set_ivy_tag() {
+    local TAG_FILE='/opt/ivy/tag'
+    local TAG="${1}"
+    echo "${TAG}" > "${TAG_FILE}"
+}
+
 function get_cloud() {
     # Discover the current cloud platform. Very rudimentary, could fail eventually, but since 'compute' is
     # Google's trademark word for their service, it's not likely that AWS suddenly has this value.

@@ -1,9 +1,7 @@
 consul_home: /opt/consul
-vault_home: /opt/vault
 consul_config_dir: /etc/consul.d
 consul_data_dir: "{{ consul_home }}/data"
 consul_user: consul
 consul_group: consul
 
 consul_url: "https://releases.hashicorp.com/consul/1.6.2/consul_1.6.2_linux_amd64.zip"
-vault_url: "https://releases.hashicorp.com/vault/0.7.0/vault_0.7.0_linux_amd64.zip"
