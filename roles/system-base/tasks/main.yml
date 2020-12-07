@@ -59,6 +59,29 @@
     creates: /etc/datadog-agent
     cmd: "DD_API_KEY={{ datadog_api_key }} /opt/ivy/install_datadog.sh"
 
+- name: Add New Relic Infrastructure repo
+  yum_repository:
+    name: newrelic-infra
+    description: New Relic Infrastructure
+    baseurl: https://download.newrelic.com/infrastructure_agent/linux/yum/el/7/$basearch
+    gpgkey: https://download.newrelic.com/infrastructure_agent/gpg/newrelic-infra.gpg
+    gpgcheck: yes
+    repo_gpgcheck: yes
+
+- name: Install New Relic Infrastructure agent
+  yum:
+    name:
+      - newrelic-infra
+    update_cache: yes
+    disablerepo: '*'
+    enablerepo: 'newrelic-infra'
+
+- name: disable newrelic-infra on first boot
+  service:
+    name: newrelic-infra
+    enabled: no
+    state: stopped
+
 - name: setup syslog logrotation
   copy:
     src: etc/logrotate.d/syslog
