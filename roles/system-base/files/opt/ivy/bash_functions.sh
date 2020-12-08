@@ -117,23 +117,25 @@ function set_newrelic_infra_key() {
     systemctl start newrelic-infra
 }
 
+# Note: the function below requires get_tags function which
+#       is only present in bash_lib/<cloud>.sh
 function set_newrelic_statsd() {
     local NR_API_KEY="${1}"
     local NR_ACCOUNT_ID="${2}"
     local NR_EU_REGION="${3:-false}"
     local NR_STATSD_CFG="${4:-/etc/newrelic-infra/nri-statsd.toml}"
-	local NR_INSIGHTS_DOMAIN='newrelic.com'
-	local NR_METRICS_DOMAIN='newrelic.com'
+    local NR_INSIGHTS_DOMAIN='newrelic.com'
+    local NR_METRICS_DOMAIN='newrelic.com'
     local HOSTNAME_VALUE="$(hostname -f)"
 
-	if [ "${NR_EU_REGION}" == 'true' ]; then
-	    NR_INSIGHTS_DOMAIN='eu01.nr-data.net'
-	    NR_METRICS_DOMAIN="eu.${NR_METRICS_DOMAIN}"
-	fi
+    if [ "${NR_EU_REGION}" == 'true' ]; then
+        NR_INSIGHTS_DOMAIN='eu01.nr-data.net'
+        NR_METRICS_DOMAIN="eu.${NR_METRICS_DOMAIN}"
+    fi
 
-	cat <<EOF > "${NR_STATSD_CFG}"
+    cat <<EOF > "${NR_STATSD_CFG}"
 hostname = "${HOSTNAME_VALUE}"
-default-tags = "hostname:${HOSTNAME_VALUE} sysenv:$()"
+default-tags = "hostname:${HOSTNAME_VALUE} $(get_tags)"
 percent-threshold = [90, 95, 99]
 backends='newrelic'
 [newrelic]

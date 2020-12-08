@@ -1,8 +1,8 @@
 #!/bin/echo "This is a library, please source it from another script"
 
 ##
-## aws.sh
-## AWS-specific modules for Ivy
+## azure.sh
+## Azure-specific modules for Ivy
 ##
 ## Use this script by sourcing the parent `bash_functions.sh` script.
 ##
@@ -24,6 +24,11 @@ function get_region() {
 
 function get_instance_id() {
     echo $(curl -H 'Metadata:true' --retry 3 --silent --fail 'http://169.254.169.254/metadata/instance/compute?api-version=2019-06-01' | jq -r '.vmId')
+}
+
+function get_tags() {
+    local SEPARATOR="${1:- }"
+    echo $(curl -H 'Metadata:true' --retry 3 --silent --fail 'http://169.254.169.254/metadata/instance/compute?api-version=2019-06-01' | jq -r '.tags' | tr ';' "${SEPARATOR}")
 }
 
 function get_tag_value() {

@@ -67,6 +67,16 @@ function get_group() {
                                       --output text)
 }
 
+function get_tags() {
+    local SEPARATOR="${1:- }"
+    local REGION=$(get_region)
+    local INSTANCE_ID=$(get_instance_id)
+    echo $(aws ec2 describe-tags --region ${REGION} \
+                                 --filters "Name=resource-id,Values=${INSTANCE_ID}" \
+                                 --query 'Tags[*].[@.Key, @.Value]' \
+                                 --output text | sed -e 's/\s\+/:/g' | tr '\n' "${SEPARATOR}")
+}
+
 function get_eni_id() {
     local ENI_ROLE=$1
     local SERVICE=$2
