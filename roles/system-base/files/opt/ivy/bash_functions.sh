@@ -98,13 +98,20 @@ function get_ram_mb_by_percent_for_java() {
 function set_datadog_key() {
     local DD_API_KEY="${1}"
     local DD_CONFIG_FILE="${2:-/etc/datadog-agent/datadog.yaml}"
-    sed -i "s/ivy-use-set-datadog-key/${DD_API_KEY}/g" "${DD_CONFIG_FILE}"
+    cat <<EOF > "${DD_CONFIG_FILE}"
+api_key: ${DD_API_KEY}
+bind_host: 0.0.0.0
+EOF
+    systemctl enable datadog-agent
+    systemctl start datadog-agent
 }
 
 function set_newrelic_infra_key() {
     local NRIA_LICENSE_KEY="${1}"
     local NRIA_LICENSE_FILE="${2:-/etc/newrelic-infra.yml}"
     echo "license_key: ${NRIA_LICENSE_KEY}" > "${NRIA_LICENSE_FILE}"
+    systemctl enable newrelic-infra
+    systemctl start newrelic-infra
 }
 
 function set_prompt_color() {

@@ -54,12 +54,18 @@
     create: yes
   when: ivy_tag != "" # noqa 602
 
-- name: install datadog
-  shell:
-    creates: /etc/datadog-agent
-    cmd: "DD_API_KEY={{ datadog_api_key }} /opt/ivy/install_datadog.sh"
+- name: add datadog repo
+  yum_repository:
+    name: datadog
+    description: Datadog, Inc.
+    baseurl: https://yum.datadoghq.com/stable/7/x86_64/
+    gpgkey:
+      - https://yum.datadoghq.com/DATADOG_RPM_KEY_E09422B3.public
+      - https://yum.datadoghq.com/DATADOG_RPM_KEY_20200908.public
+    gpgcheck: yes
+    repo_gpgcheck: no
 
-- name: Add New Relic Infrastructure repo
+- name: add new relic infrastructure repo
   yum_repository:
     name: newrelic-infra
     description: New Relic Infrastructure
@@ -72,15 +78,21 @@
   yum:
     name:
       - newrelic-infra
+      - datadog-agent
     update_cache: yes
     disablerepo: '*'
-    enablerepo: 'newrelic-infra'
+    enablerepo:
+      - newrelic-infra
+      - datadog
 
-- name: disable newrelic-infra on first boot
+- name: disable newrelic-infra and datadog-agent on first boot
   service:
-    name: newrelic-infra
+    name: "{{ item }}"
     enabled: no
     state: stopped
+  loop:
+    - datadog-agent
+    - newrelic-infra
 
 - name: setup syslog logrotation
   copy:
