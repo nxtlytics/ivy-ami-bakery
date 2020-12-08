@@ -74,7 +74,7 @@
     gpgcheck: yes
     repo_gpgcheck: yes
 
-- name: Install New Relic Infrastructure agent
+- name: install new relic infrastructure and datadog agents
   yum:
     name:
       - newrelic-infra
