@@ -1,0 +1,14 @@
+[Unit]
+Description=New Relic Infrastructure gostatsd
+After=network.target
+
+[Service]
+Type=simple
+Restart=on-failure
+RestartSec=3s
+ExecStart=/usr/local/bin/gostatsd \
+  --config-path=/etc/newrelic-infra/nri-statsd.toml \
+  --verbose
+
+[Install]
+WantedBy=multi-user.target

@@ -6,13 +6,12 @@
         "source_ami": "{{env `PACKER_SOURCE_IMAGE`}}",
         "volume_size": "{{env `PACKER_VOLUME_SIZE`}}",
         "ivy_tag": "{{env `PACKER_IVY_TAG`}}",
-        "datadog_api_key": ""
     },
     "builders": [
         {
             "type": "amazon-chroot",
             "ami_virtualization_type": "hvm",
-            "copy_files": ["/etc/resolv.conf", "/root/bpftrace"],
+            "copy_files": ["/etc/resolv.conf", "/root/bpftrace", "/root/gostatsd"],
             "source_ami": "{{user `source_ami`}}",
             "ami_name": "{{user `ami_name`}}-{{timestamp}}",
             "ami_users": "{{user `ami_users`}}",
@@ -44,7 +43,7 @@
             "type": "ansible-local",
             "playbook_file": "./providers/amazon/images/{{user `ami_name`}}/provision.yml",
             "playbook_dir": "./roles",
-            "extra_arguments": [ "--extra-vars \"ivy_tag={{user `ivy_tag`}} datadog_api_key={{user `datadog_api_key`}}\"" ],
+            "extra_arguments": [ "--extra-vars \"ivy_tag={{user `ivy_tag`}}\"" ],
             "clean_staging_directory": true
         },
         {

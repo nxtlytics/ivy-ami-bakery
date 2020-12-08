@@ -94,6 +94,11 @@
     - datadog-agent
     - newrelic-infra
 
+- name: copy gostatsd systemd unit for new relic
+  copy:
+    src: etc/systemd/system/gostatsd.service
+    dest: /etc/systemd/system/gostatsd.service
+
 - name: setup syslog logrotation
   copy:
     src: etc/logrotate.d/syslog
@@ -133,12 +138,15 @@
     name: epel-release
     state: latest
 
-- name: copy bpftrace to /usr/local/bin
+- name: copy bpftrace and gostatsd to /usr/local/bin
   copy:
     remote_src: yes
-    src: /root/bpftrace
-    dest: /usr/local/bin/bpftrace
+    src: "/root/{{ item }}"
+    dest: "/usr/local/bin/{{ item }}"
     mode: 0755
+  loop:
+    - bpftrace
+    - gostatsd
 
 - name: install utilities
   yum:
