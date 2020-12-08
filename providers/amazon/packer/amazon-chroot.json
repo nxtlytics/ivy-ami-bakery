@@ -11,7 +11,7 @@
         {
             "type": "amazon-chroot",
             "ami_virtualization_type": "hvm",
-            "copy_files": ["/etc/resolv.conf", "/root/bpftrace", "/root/gostatsd"],
+            "copy_files": ["/etc/resolv.conf"],
             "source_ami": "{{user `source_ami`}}",
             "ami_name": "{{user `ami_name`}}-{{timestamp}}",
             "ami_users": "{{user `ami_users`}}",
