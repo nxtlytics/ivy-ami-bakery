@@ -12,13 +12,13 @@ sed -i -e '/^#.*__IVY_TAG__/s/^#//' -e "s/__IVY_TAG__/${TAG}/" /etc/dnsmasq.d/10
 
 CONSUL_MASTERS=""
 if [[ $(get_cloud) -eq "aws" ]]; then
-   MESOS_IPS=($(aws ec2 describe-network-interfaces --region $(get_region) \
-                   --filters Name=tag:"${TAG}:sysenv",Values="${ENV}"    \
-                             Name=tag:"${TAG}:service",Values="Mesos"                 \
-                   --query 'NetworkInterfaces[*].PrivateIpAddress'                \
-                   --output text))
+    MASTERS_IPS=($(aws ec2 describe-network-interfaces --region $(get_region)  \
+                      --filters Name=tag:"${TAG}:sysenv",Values="${ENV}"       \
+                                Name=tag:"${TAG}:service",Values="Mesos,Vault" \
+                      --query 'NetworkInterfaces[*].PrivateIpAddress'          \
+                      --output text))
 
-    for IP in "${MESOS_IPS[@]}"; do
+    for IP in "${MASTERS_IPS[@]}"; do
       CONSUL_MASTERS="${CONSUL_MASTERS} -retry-join=${IP}"
     done
 

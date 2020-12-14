@@ -22,11 +22,11 @@ function get_mdsv2() {
 }
 
 function get_instance_id() {
-    echo $(curl --retry 3 --silent --fail http://169.254.169.254/latest/meta-data/instance-id)
+    echo $(get_mdsv2 'instance-id')
 }
 
 function get_availability_zone() {
-    echo $(curl --retry 3 --silent --fail http://169.254.169.254/latest/meta-data/placement/availability-zone)
+    echo $(get_mdsv2 'placement/availability-zone')
 }
 
 function get_region() {
