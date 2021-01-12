@@ -1,0 +1,13 @@
+---
+# Import tasks for the specific OS being built
+- include: "{{ ansible_distribution }}.yml"
+
+- name: install rsyslog output modules
+  yum:
+    name: "{{ item }}"
+    state: latest
+  loop:
+    - omhiredis
+    - omrelp
+
+# TODO: install logging setup script

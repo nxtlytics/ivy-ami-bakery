@@ -1,0 +1,12 @@
+---
+# Amazon linux (2) specific tasks
+- name: install kernel 5.10
+  yum:
+    name: "{{ kernel_rpm }}"
+    state: latest
+
+- name: update grub to point to latest kernel
+  command:
+    cmd: |
+      grub2-set-default 0
+      grub2-mkconfig -o /boot/grub2/grub.cfg

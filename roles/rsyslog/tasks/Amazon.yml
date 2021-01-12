@@ -1,0 +1,9 @@
+---
+- name: install rsyslog repository
+  yum_repository:
+    name: rsyslog-v8
+    baseurl: http://rpms.adiscon.com/v8-stable/epel-7/$basearch
+    enabled: yes
+    gpgcheck: no
+    gpgkey: http://rpms.adiscon.com/RPM-GPG-KEY-Adiscon
+    protect: 1
