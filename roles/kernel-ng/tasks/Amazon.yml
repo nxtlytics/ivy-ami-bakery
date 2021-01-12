@@ -6,7 +6,7 @@
     state: latest
 
 - name: update grub to point to latest kernel
-  command:
+  shell:
     cmd: |
       grub2-set-default 0
       grub2-mkconfig -o /boot/grub2/grub.cfg
