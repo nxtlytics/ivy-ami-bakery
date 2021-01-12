@@ -19,6 +19,23 @@
     - kubelet
     - kubectl
 
+- name: make kubelet systemd drop-in directory
+  file:
+    name: /etc/systemd/system/kubelet.service.d
+    state: directory
+
+- name: copy kubelet-common drop-in
+  copy:
+    src: etc/systemd/system/kubelet.service.d/10-kubelet-common.conf
+    dest: /etc/systemd/system/kubelet.service.d/10-kubelet-common.conf
+    mode: 0644
+
+- name: copy kubelet sysconfig
+  copy:
+    src: etc/sysconfig/kubelet
+    dest: /etc/sysconfig/kubelet
+    mode: 0644
+
 - name: make /etc/kubernetes skeleton
   file:
     name: /etc/kubernetes/{{ item }}
@@ -32,6 +49,11 @@
   file:
     name: /var/lib/kubelet
     state: directory
+
+- name: copy base kubelet config file
+  copy:
+    src: etc/kubernetes/kubelet/config.json
+    dest: /etc/kubernetes/kubelet/config.json
 
 - name: make cni directories (compatibility with aws-node)
   file:
@@ -48,22 +70,6 @@
     src: "https://github.com/containernetworking/plugins/releases/download/v{{ cni_version }}/cni-plugins-linux-{{ 'amd64' if ansible_architecture == 'x86_64' else ansible_architecture }}-v{{ cni_version }}.tgz"
     dest: /opt/cni/bin
     remote_src: yes
-
-- name: make kubelet systemd drop-in directory
-  file:
-    name: /etc/systemd/system/kubelet.service.d
-    state: directory
-
-- name: copy kubelet-common drop-in
-  copy:
-    src: etc/systemd/system/kubelet.service.d/10-kubelet-common.conf
-    dest: /etc/systemd/system/kubelet.service.d/10-kubelet-common.conf
-    mode: 0644
-
-- name: copy base kubelet config file
-  copy:
-    src: etc/kubernetes/kubelet/kubelet-config.json
-    dest: /etc/kubernetes/kubelet/kubelet-config.json
 
 # TODO: make drop-in for reading labels
 # TODO: install traefik ingresscontroller locally
