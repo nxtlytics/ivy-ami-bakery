@@ -26,6 +26,7 @@
   loop:
     - pki
     - manifests
+    - kubelet
 
 - name: make /var/lib/kubelet skeleton
   file:

@@ -1,5 +1,5 @@
-KUBELET_KUBECONFIG_FILE="/etc/kubernetes/kubelet-kubeconfig.yaml"
-KUBELET_CONFIG="/etc/kubernetes/kubelet-config.json"
+KUBELET_KUBECONFIG="/etc/kubernetes/kubelet/kubeconfig.yaml"
+KUBELET_CONFIG="/etc/kubernetes/kubelet/config.json"
 KUBELET_EXTRA_ARGS=""
 
 # These are updated by cloud-init
