@@ -1,5 +1,7 @@
 ---
 # kubernetes version - should match (close-ish) the version of the masters
-k8s_version: "1.20"
+k8s_version: "1.18"
 # cni utilities version to download from github
 cni_version: "0.9.0"
+# iam auth version to download from github
+iam_authenticator_version: "0.5.2"

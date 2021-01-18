@@ -4,6 +4,7 @@
   user: ec2-user
   connection: local
   roles:
+    - system-base
     - kernel-ng
     - docker
     - k8s-agents

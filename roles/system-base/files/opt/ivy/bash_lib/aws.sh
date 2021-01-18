@@ -25,6 +25,10 @@ function get_instance_id() {
     echo $(curl --retry 3 --silent --fail http://169.254.169.254/latest/meta-data/instance-id)
 }
 
+function get_instance_type() {
+    echo $(curl --retry 3 --silent --fail http://169.254.169.254/latest/meta-data/instance-type)
+}
+
 function get_availability_zone() {
     echo $(curl --retry 3 --silent --fail http://169.254.169.254/latest/meta-data/placement/availability-zone)
 }

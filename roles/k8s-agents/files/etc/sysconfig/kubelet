@@ -5,4 +5,4 @@ KUBELET_EXTRA_ARGS=""
 # These are updated by cloud-init
 CLUSTER_DOMAIN="cluster.local"
 CLUSTER_DNS="10.10.10.10"
-NODE_LABELS="kubelet-unconfigured=true"
+EXTRA_NODE_LABELS="kubelet-unconfigured=true"

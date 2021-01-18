@@ -19,6 +19,12 @@
     - kubelet
     - kubectl
 
+- name: install aws-iam-authenticator
+  get_url:
+    url: "https://github.com/kubernetes-sigs/aws-iam-authenticator/releases/download/v{{ iam_authenticator_version }}/aws-iam-authenticator_{{ iam_authenticator_version }}_linux_{{ 'amd64' if ansible_architecture == 'x86_64' else ansible_architecture }}"
+    dest: /usr/lib/aws-iam-authenticator
+    mode: 0755
+
 - name: make kubelet systemd drop-in directory
   file:
     name: /etc/systemd/system/kubelet.service.d
@@ -29,6 +35,12 @@
     src: etc/systemd/system/kubelet.service.d/10-kubelet-common.conf
     dest: /etc/systemd/system/kubelet.service.d/10-kubelet-common.conf
     mode: 0644
+
+- name: copy kubelet-default-labels script
+  copy:
+    src: opt/ivy/kubelet-default-labels.sh
+    dest: /opt/ivy/kubelet-default-labels.sh
+    mode: 0755
 
 - name: copy kubelet sysconfig
   copy:
