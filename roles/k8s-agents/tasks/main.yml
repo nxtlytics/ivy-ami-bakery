@@ -83,7 +83,14 @@
     dest: /opt/cni/bin
     remote_src: yes
 
-# TODO: make drop-in for reading labels
+# aws-cni adds secondary ENIs to the instance dynamically, and it expects no third party utilities to manage the interfaces.
+# ec2-net-utils triggers an addition of all secondary IPs automatically which breaks aws-cni's expectations
+# and causes pods to be unable to communicate with the network as the pod's IP is assigned to the host incorrectly
+- name: remove ec2-net-utils as it conflicts with the AWS CNI
+  yum:
+    name: ec2-net-utils
+    state: removed
+
 # TODO: install traefik ingresscontroller locally
 # TODO: install coredns locally
 # TODO: install cilium locally
