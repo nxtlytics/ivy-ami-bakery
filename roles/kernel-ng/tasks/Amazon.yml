@@ -1,8 +1,21 @@
 ---
 # Amazon linux (2) specific tasks
-- name: install kernel 5.10
+
+# Note: we can't just rpm install elrepo because it requires glibc=2.17, whereas we have glibc 2.26
+# ¯\_(ツ)_/¯
+- name: add elrepo-kernel repository
+  yum_repository:
+    name: elrepo-kernel
+    enabled: no
+    description: ELRepo.org Community Enterprise Linux Kernel Repository - el7
+    mirrorlist: http://mirrors.elrepo.org/mirrors-elrepo-kernel.el7
+    baseurl: http://elrepo.org/linux/kernel/el7/$basearch/
+    gpgcheck: no
+
+- name: install kernel-ml >= {{ kernel_min }}
   yum:
-    name: "{{ kernel_rpm }}"
+    name: "kernel-ml >= {{ kernel_min }}"
+    enablerepo: elrepo-kernel
     state: latest
 
 - name: update grub to point to latest kernel
