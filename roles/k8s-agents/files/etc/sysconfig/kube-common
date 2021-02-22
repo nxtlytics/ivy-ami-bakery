@@ -1,0 +1,7 @@
+# Name of the cluster
+CLUSTER_NAME=
+# endpoint address (apiserver -> etcd, kube-* -> apiserver, etc...)
+ENDPOINT=
+
+# Log level for all kubernetes components running on this controller
+LOG_LEVEL=3

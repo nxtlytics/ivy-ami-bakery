@@ -1,0 +1,11 @@
+# etcd ca and key
+ETCD_CA=
+ETCD_CA_KEY=
+
+# kubernetes specific ca and key
+KUBE_CA=
+KUBE_CA_KEY=
+
+# service account keypair
+SERVICE_ACCOUNT_PUB=
+SERVICE_ACCOUNT_KEY=

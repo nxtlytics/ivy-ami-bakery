@@ -1,0 +1,4 @@
+AUTH_KUBECONFIG=/etc/kubernetes/aws-iam-authenticator/kubeconfig.yaml
+AUTH_HOOK_FILE=/etc/kubernetes/aws-iam-authenticator/kubeconfig-webhook.yaml
+# Sourced by kube-apiserver, must match AUTH_HOOK_FILE (systemd can't do subsitution inside EnvironmentFiles, so gotta copy/paste here...)
+AWS_AUTH_HOOK_CONFIG="--authentication-token-webhook-config-file=/etc/kubernetes/aws-iam-authenticator/kubeconfig-webhook.yaml"

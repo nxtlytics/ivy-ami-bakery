@@ -1,0 +1,34 @@
+[Unit]
+Description=kube-apiserver: Serve API requests for kubernetes components
+Documentation=https://kubernetes.io/docs/
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+# Common environment variables
+EnvironmentFile=/etc/sysconfig/kube-common
+# For CA certs and keys
+EnvironmentFile=/etc/sysconfig/kube-pki
+# Optionally include IAM authenticator configuration
+EnvironmentFile=-/etc/sysconfig/aws-iam-authenticator
+# APIServer specific configuration
+EnvironmentFile=/etc/sysconfig/kube-apiserver
+ExecStart=/usr/bin/kube-apiserver \
+    --allow-privileged true \
+    --audit-log-path /var/log/kubernetes/apiserver.audit.log \
+    --authorization-mode RBAC,Node \
+    --etcd-cafile $ETCD_CA \
+    --etcd-certfile $ETCD_CLIENT_CERT \
+    --etcd-keyfile $ETCD_CLIENT_KEY \
+    --etcd-servers $ENDPOINT \
+    --goaway-chance $GOAWAY_CHANCE \
+    --secure-port 443 \
+    --service-account-key-file $SERVICE_ACCOUNT_PUB \
+    --service-account-signing-key-file  $SERVICE_ACCOUNT_KEY \
+    --service-cluster-ip-range $SERVICE_CIDR \
+    --tls-cert-file $TLS_CERT_FILE \
+    --tls-private-key-file $TLS_PRIVATE_KEY_FILE \
+    --kubelet-client-certificate $KUBELET_CLIENT_CERT \
+    --kubelet-client-key $KUBELET_CLIENT_KEY \
+    -v $LOG_LEVEL \
+    $AUTH_HOOK_CONFIG

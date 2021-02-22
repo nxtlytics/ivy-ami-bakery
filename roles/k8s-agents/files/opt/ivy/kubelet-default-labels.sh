@@ -47,7 +47,7 @@ for label in "${region_labels[@]}"; do
 done
 
 # Add instance ID
-NODE_LABELS+=("node.kubernetes.io/instance-id=$(get_instance_id)}")
+NODE_LABELS+=("node.kubernetes.io/instance-id=$(get_instance_id)")
 
 # Add all Ivy tags as labels to the node
 ivy_tags=$(get_tags | tr " " "\n" | grep "$(get_ivy_tag)" | awk '{ split($0, tagspec, ":"); print tagspec[1] "/" tagspec[2] "=" tagspec[3];}')

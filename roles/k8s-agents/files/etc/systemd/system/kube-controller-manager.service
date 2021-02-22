@@ -1,0 +1,20 @@
+[Unit]
+Description=kube-controller-manager: handles kubernetes control loops for many background tasks
+Documentation=https://kubernetes.io/docs/
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+# Common environment variables
+EnvironmentFile=/etc/sysconfig/kube-common
+# For CA certs and keys
+EnvironmentFile=/etc/sysconfig/kube-pki
+# Controller-manager specific configuration
+EnvironmentFile=/etc/sysconfig/kube-controller-manager
+ExecStart=/usr/bin/kube-controller-manager \
+    --cluster-name $CLUSTER_NAME \
+    --cluster-signing-cert-file $KUBE_CA \
+    --cluster-signing-key-file $KUBE_CA_KEY \
+    --kubeconfig $KUBECONFIG \
+    --service-account-private-key-file $SERVICE_ACCOUNT_KEY \
+    -v $LOG_LEVEL
