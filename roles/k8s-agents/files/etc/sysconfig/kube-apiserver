@@ -1,0 +1,11 @@
+# We're using DNS for load balancing requests to the controllers, so we should prevent connections from stacking up
+# on a single controller. Hint to the connected clients that they should attempt to talk to another controller occasionally.
+GOAWAY_CHANCE=".001"
+
+# client ssl certificate issued by the etcd CA, used to communicate with the etcd server
+ETCD_CLIENT_CERT=
+ETCD_CLIENT_KEY=
+
+# apiserver's ssl certificate used for serving HTTPS requests and presenting to the kubelet to fetch logs/exec
+TLS_CERT_FILE=
+TLS_PRIVATE_KEY_FILE=

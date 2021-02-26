@@ -5,6 +5,7 @@ Wants=network-online.target
 After=network-online.target
 
 [Service]
+User=kubernetes
 # Common environment variables
 EnvironmentFile=/etc/sysconfig/kube-common
 # For CA certs and keys
@@ -14,6 +15,6 @@ ExecStart=/usr/bin/aws-iam-authenticator server \
     --address 127.0.0.1 \
     --backend-mode EKSConfigMap,CRD \
     --state-dir /var/lib/aws-iam-authenticator \
-    --generate-kubeconfig $AUTH_HOOK_FILE \
+    --generate-kubeconfig $AWS_AUTH_HOOK_FILE \
     --cluster-id $CLUSTER_NAME \
-    --kubeconfig $AUTH_KUBECONFIG
+    --kubeconfig $AWS_AUTH_KUBECONFIG

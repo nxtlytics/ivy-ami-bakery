@@ -1,0 +1,20 @@
+[Unit]
+Description=e2d: wrap etcd with a warm gossip-based embrace
+Documentation=https://github.com/criticalstack/e2d
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+User=kubernetes
+# Common environment variables
+EnvironmentFile=/etc/sysconfig/kube-common
+# For CA certs and keys
+EnvironmentFile=/etc/sysconfig/kube-pki
+# e2d specific configuration
+EnvironmentFile=/etc/sysconfig/e2d
+# NOTE: commandline parameters are used where configuration is fed in from kube-common/kube-pki
+# The rest of the configuration is done via env var in the e2d sysconfig file
+ExecStart=/usr/bin/e2d run \
+    --ca-cert $ETCD_CA \
+    --ca-key $ETCD_CA_KEY
+

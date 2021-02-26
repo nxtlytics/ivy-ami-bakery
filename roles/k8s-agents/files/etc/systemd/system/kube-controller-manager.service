@@ -5,6 +5,7 @@ Wants=network-online.target
 After=network-online.target
 
 [Service]
+User=kubernetes
 # Common environment variables
 EnvironmentFile=/etc/sysconfig/kube-common
 # For CA certs and keys
@@ -17,4 +18,6 @@ ExecStart=/usr/bin/kube-controller-manager \
     --cluster-signing-key-file $KUBE_CA_KEY \
     --kubeconfig $KUBECONFIG \
     --service-account-private-key-file $SERVICE_ACCOUNT_KEY \
+    --controllers=*,bootstrapsigner,tokencleaner \
+    --use-service-account-credentials true \
     -v $LOG_LEVEL

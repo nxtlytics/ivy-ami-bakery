@@ -1,7 +1,16 @@
-# Name of the cluster
-CLUSTER_NAME=
 # endpoint address (apiserver -> etcd, kube-* -> apiserver, etc...)
 ENDPOINT=
 
-# Log level for all kubernetes components running on this controller
-LOG_LEVEL=3
+# Name of the cluster
+CLUSTER_NAME=
+
+# Service CIDR
+SERVICE_CIDR=
+
+# Cluster DNS suffix
+CLUSTER_DOMAIN=
+# Cluster DNS IP
+CLUSTER_DNS=
+
+# Common log level for all kubernetes components running on this controller (can be overridden in the component's sysconfig file)
+LOG_LEVEL=2

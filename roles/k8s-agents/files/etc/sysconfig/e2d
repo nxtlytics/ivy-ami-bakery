@@ -1,0 +1,32 @@
+# e2d wraps etcd in a warm gossip-based embrace
+# ...and it handles backups!
+
+# hostname of this node
+E2D_NAME=
+
+# minimum cluster size for e2d to consider forming a cluster
+E2D_REQUIRED_CLUSTER_SIZE=3
+
+# how to discover peers (aws-autoscaling-group,ec2-tags)
+E2D_PEER_DISCOVERY=
+
+# where to store the etcd data
+E2D_DATA_DIR=/var/lib/etcd
+# host ipv4
+#E2D_HOST=
+
+# etcd server certificate
+E2D_SERVER_CERT=
+# etcd server private key
+E2D_SERVER_KEY=
+
+# etcd peer certificate
+E2D_PEER_CERT=
+# etcd peer private key
+E2D_PEER_KEY=
+
+# snapshot storage url (s3:// .. file://)
+E2D_SNAPSHOT_BACKUP_URL=
+E2D_SNAPSHOT_COMPRESSION=true
+E2D_SNAPSHOT_ENCRYPTION=false
+E2D_SNAPSHOT_INTERVAL="4 hours"

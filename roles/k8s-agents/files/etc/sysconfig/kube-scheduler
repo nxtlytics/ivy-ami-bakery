@@ -1,0 +1,2 @@
+# Set this to the kubeconfig file for the kube-scheduler
+KUBECONFIG=

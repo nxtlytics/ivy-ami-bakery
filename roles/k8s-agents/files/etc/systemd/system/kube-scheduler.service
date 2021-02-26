@@ -5,5 +5,10 @@ Wants=network-online.target
 After=network-online.target
 
 [Service]
+User=kubernetes
+# Common environment variables
+EnvironmentFile=/etc/sysconfig/kube-common
+# Kube-scheduler specific configuration
 EnvironmentFile=/etc/sysconfig/kube-scheduler
-ExecStart=/usr/bin/kube-scheduler
+ExecStart=/usr/bin/kube-scheduler \
+    --kubeconfig $KUBECONFIG

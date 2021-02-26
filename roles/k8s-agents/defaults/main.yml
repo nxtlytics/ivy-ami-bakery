@@ -1,4 +1,6 @@
 ---
+# e2d version - 0.4.14 includes etcd 3.4.9
+e2d_version: "0.4.14"
 # kubernetes version - should match (close-ish) the version of the masters
 k8s_version: "1.20.0"
 # cni utilities version to download from github

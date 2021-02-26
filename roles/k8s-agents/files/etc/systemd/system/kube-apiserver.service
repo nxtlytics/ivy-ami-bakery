@@ -5,6 +5,7 @@ Wants=network-online.target
 After=network-online.target
 
 [Service]
+User=kubernetes
 # Common environment variables
 EnvironmentFile=/etc/sysconfig/kube-common
 # For CA certs and keys
@@ -23,12 +24,14 @@ ExecStart=/usr/bin/kube-apiserver \
     --etcd-servers $ENDPOINT \
     --goaway-chance $GOAWAY_CHANCE \
     --secure-port 443 \
+    --insecure-port 0 \
+    --client-ca-file $KUBE_CA \
     --service-account-key-file $SERVICE_ACCOUNT_PUB \
-    --service-account-signing-key-file  $SERVICE_ACCOUNT_KEY \
+    --service-account-signing-key-file $SERVICE_ACCOUNT_KEY \
     --service-cluster-ip-range $SERVICE_CIDR \
     --tls-cert-file $TLS_CERT_FILE \
     --tls-private-key-file $TLS_PRIVATE_KEY_FILE \
-    --kubelet-client-certificate $KUBELET_CLIENT_CERT \
-    --kubelet-client-key $KUBELET_CLIENT_KEY \
+    --kubelet-client-certificate $TLS_CERT_FILE \
+    --kubelet-client-key $TLS_PRIVATE_KEY_FILE \
     -v $LOG_LEVEL \
-    $AUTH_HOOK_CONFIG
+    $AWS_AUTH_HOOK_CONFIG

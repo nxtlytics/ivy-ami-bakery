@@ -1,4 +1,11 @@
 ---
+- name: create kubernetes system user
+  user:
+    name: kubernetes
+    shell: /sbin/nologin
+    home: /var/empty
+    system: yes
+
 - name: add k8s repo
   yum_repository:
     name: kubernetes
@@ -29,6 +36,14 @@
   file:
     name: /var/lib/aws-iam-authenticator
     state: directory
+    user: kubernetes
+    group: kubernetes
+
+- name: download e2d (includes etcd)
+  unarchive:
+    src: "https://github.com/criticalstack/e2d/releases/download/v{{ e2d_version }}/e2d_{{ e2d_version }}_Linux_{{ ansible_architecture }}.tar.gz"
+    dest: /usr/bin/
+    remote_src: yes
 
 - name: download k8s server components
   get_url:
@@ -47,6 +62,7 @@
     dest: /etc/systemd/system/{{ item }}
     mode: 0644
   loop:
+    - e2d.service
     - aws-iam-authenticator.service
     - kube-apiserver.service
     - kube-scheduler.service
@@ -63,17 +79,26 @@
     dest: /etc/systemd/system/kubelet.service.d/10-kubelet-common.conf
     mode: 0644
 
+- name: copy component configurations
+  copy:
+    src: etc/sysconfig/{{ item }}
+    dest: /etc/sysconfig/{{ item }}
+    mode: 0644
+  loop:
+      - aws-iam-authenticator
+      - e2d
+      - kube-apiserver
+      - kube-common
+      - kube-controller-manager
+      - kube-pki
+      - kube-scheduler
+      - kubelet
+
 - name: copy kubelet-default-labels script
   copy:
     src: opt/ivy/kubelet-default-labels.sh
     dest: /opt/ivy/kubelet-default-labels.sh
     mode: 0755
-
-- name: copy kubelet sysconfig
-  copy:
-    src: etc/sysconfig/kubelet
-    dest: /etc/sysconfig/kubelet
-    mode: 0644
 
 - name: make /etc/kubernetes skeleton
   file:
@@ -83,16 +108,24 @@
     - pki
     - manifests
     - kubelet
+    - aws-iam-authenticator
+
+- name: copy base kubelet config file
+  copy:
+    src: etc/kubernetes/kubelet/config.json
+    dest: /etc/kubernetes/kubelet/config.json
 
 - name: make /var/lib/kubelet skeleton
   file:
     name: /var/lib/kubelet
     state: directory
 
-- name: copy base kubelet config file
-  copy:
-    src: etc/kubernetes/kubelet/config.json
-    dest: /etc/kubernetes/kubelet/config.json
+- name: make /var/lib/etcd skeleton
+  file:
+    name: /var/lib/etcd
+    state: directory
+    user: kubernetes
+    group: kubernetes
 
 - name: make cni directories (compatibility with aws-node)
   file:
