@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-# Add /usr/local/bin to path if not there already
-if [[ :$PATH: == *:"/usr/local/bin":* ]]; then
-    export PATH=$PATH:/usr/local/bin
+# Add /usr/local/bin to path with highest precedence if not there already
+if [[ ":$PATH:" != *:"/usr/local/bin":* ]]; then
+    export PATH=/usr/local/bin:$PATH
 fi
 
 # give us a nice ps1 prompt if we're in a pty

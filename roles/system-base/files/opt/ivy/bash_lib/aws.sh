@@ -310,9 +310,8 @@ EOF
 
 function get_ssm_param() {
     local PARAMETER_NAME="${1}"
-    local EXTRA_AWS_CLI_PARAMS="${2:-''}"
     local REGION="${3:-$(get_region)}"
-    local VALUE=$(aws ssm get-parameter --region "${REGION}" --name "${PARAMETER_NAME}" ${EXTRA_AWS_CLI_PARAMS} | jq -r ".Parameter|.Value" )
+    local VALUE=$(aws ssm get-parameter --region "${REGION}" --name "${PARAMETER_NAME}" --with-decryption --output text --query 'Parameter.Value' )
     echo ${VALUE}
 }
 

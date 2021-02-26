@@ -1,5 +1,5 @@
 [Unit]
-Description=kube-scheduler: assigns pods to nodes intelligently
+Description=kube-scheduler: intelligently assigns pods to nodes
 Documentation=https://kubernetes.io/docs/
 Wants=network-online.target
 After=network-online.target
@@ -11,4 +11,6 @@ EnvironmentFile=/etc/sysconfig/kube-common
 # Kube-scheduler specific configuration
 EnvironmentFile=/etc/sysconfig/kube-scheduler
 ExecStart=/usr/bin/kube-scheduler \
-    --kubeconfig $KUBECONFIG
+    --kubeconfig $KUBECONFIG \
+    --authentication-kubeconfig $KUBECONFIG \
+    --authorization-kubeconfig $KUBECONFIG

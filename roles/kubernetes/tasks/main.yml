@@ -105,9 +105,16 @@
     state: directory
   loop:
     - pki
+    - etcd/pki
     - manifests
     - kubelet
-    - aws-iam-authenticator
+
+- name: make config dir for aws-iam-authenticator
+  file:
+    name: /etc/kubernetes/aws-iam-authenticator
+    state: directory
+    owner: kubernetes
+    group: kubernetes
 
 - name: copy base kubelet config file
   copy:
