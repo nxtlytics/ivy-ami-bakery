@@ -54,7 +54,6 @@
     - kube-apiserver
     - kube-controller-manager
     - kube-scheduler
-    - kube-cloud-controller-manager
 
 - name: copy k8s server systemd units
   copy:
