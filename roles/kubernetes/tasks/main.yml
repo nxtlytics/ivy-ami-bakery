@@ -36,7 +36,7 @@
   file:
     name: /var/lib/aws-iam-authenticator
     state: directory
-    user: kubernetes
+    owner: kubernetes
     group: kubernetes
 
 - name: download e2d (includes etcd)
@@ -47,7 +47,7 @@
 
 - name: download k8s server components
   get_url:
-    url: "https://storage.googleapis.com/kubernetes-release/release/v{{ k8s_version}}/bin/linux/{{ 'amd64' if ansible_architecture == 'x86_64' else ansible_architecture }}/{{ item }}"
+    url: "https://storage.googleapis.com/kubernetes-release/release/v{{ k8s_version }}/bin/linux/{{ 'amd64' if ansible_architecture == 'x86_64' else ansible_architecture }}/{{ item }}"
     dest: "/usr/bin/{{ item }}"
     mode: 0755
   loop:
@@ -124,7 +124,7 @@
   file:
     name: /var/lib/etcd
     state: directory
-    user: kubernetes
+    owner: kubernetes
     group: kubernetes
 
 - name: make cni directories (compatibility with aws-node)

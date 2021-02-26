@@ -14,7 +14,7 @@ EnvironmentFile=/etc/sysconfig/aws-iam-authenticator
 ExecStart=/usr/bin/aws-iam-authenticator server \
     --address 127.0.0.1 \
     --backend-mode EKSConfigMap,CRD \
-    --state-dir /var/lib/aws-iam-authenticator \
+    --state-dir $AWS_AUTH_STATE_DIR \
     --generate-kubeconfig $AWS_AUTH_HOOK_FILE \
     --cluster-id $CLUSTER_NAME \
     --kubeconfig $AWS_AUTH_KUBECONFIG

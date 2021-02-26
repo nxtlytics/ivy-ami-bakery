@@ -7,4 +7,4 @@
     - system-base
     - kernel-ng
     - docker
-    - k8s-agents
+    - kubernetes
