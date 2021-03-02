@@ -11,6 +11,6 @@ EnvironmentFile=/etc/sysconfig/kube-common
 # Kube-scheduler specific configuration
 EnvironmentFile=/etc/sysconfig/kube-scheduler
 ExecStart=/usr/bin/kube-scheduler \
-    --kubeconfig $KUBECONFIG \
-    --authentication-kubeconfig $KUBECONFIG \
-    --authorization-kubeconfig $KUBECONFIG
+    --kubeconfig=${KUBECONFIG} \
+    --authentication-kubeconfig=${KUBECONFIG} \
+    --authorization-kubeconfig=${KUBECONFIG}

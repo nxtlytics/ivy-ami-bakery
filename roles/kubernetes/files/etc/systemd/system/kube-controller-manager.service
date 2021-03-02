@@ -13,11 +13,11 @@ EnvironmentFile=/etc/sysconfig/kube-pki
 # Controller-manager specific configuration
 EnvironmentFile=/etc/sysconfig/kube-controller-manager
 ExecStart=/usr/bin/kube-controller-manager \
-    --cluster-name $CLUSTER_NAME \
-    --cluster-signing-cert-file $KUBE_CA \
-    --cluster-signing-key-file $KUBE_CA_KEY \
-    --kubeconfig $KUBECONFIG \
-    --service-account-private-key-file $SERVICE_ACCOUNT_KEY \
-    --controllers '*,bootstrapsigner,tokencleaner' \
-    --use-service-account-credentials true \
-    -v $LOG_LEVEL
+    --cluster-name=${CLUSTER_NAME} \
+    --cluster-signing-cert-file=${KUBE_CA} \
+    --cluster-signing-key-file=${KUBE_CA_KEY} \
+    --kubeconfig=${KUBECONFIG} \
+    --service-account-private-key-file=${SERVICE_ACCOUNT_KEY} \
+    --controllers='*,bootstrapsigner,tokencleaner' \
+    --use-service-account-credentials=true \
+    -v=${LOG_LEVEL}

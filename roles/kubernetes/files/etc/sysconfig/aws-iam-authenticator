@@ -1,5 +1,5 @@
 # NOTE: All variables in this file must be prefixed with AWS_AUTH_ (or not collide with any options in kube-apiserver) since kube-apiserver includes this file
-AWS_AUTH_KUBECONFIG=/etc/kubernetes/aws-iam-authenticator/kubeconfig.yaml
+AWS_AUTH_KUBECONFIG=
 AWS_AUTH_HOOK_FILE=/etc/kubernetes/aws-iam-authenticator/kubeconfig-webhook.yaml
 AWS_AUTH_STATE_DIR=/var/lib/aws-iam-authenticator
 # Sourced by kube-apiserver, must match AWS_AUTH_HOOK_FILE (systemd can't do subsitution inside EnvironmentFiles, so gotta copy/paste here...)

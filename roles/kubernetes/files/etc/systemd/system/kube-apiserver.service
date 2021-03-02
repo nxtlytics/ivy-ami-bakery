@@ -6,6 +6,8 @@ After=network-online.target
 
 [Service]
 User=kubernetes
+# Allow apiserver (as kubernetes user) to bind to privileged tcp ports
+AmbientCapabilities=CAP_NET_BIND_SERVICE
 # Common environment variables
 EnvironmentFile=/etc/sysconfig/kube-common
 # For CA certs and keys
@@ -15,23 +17,24 @@ EnvironmentFile=-/etc/sysconfig/aws-iam-authenticator
 # APIServer specific configuration
 EnvironmentFile=/etc/sysconfig/kube-apiserver
 ExecStart=/usr/bin/kube-apiserver \
-    --allow-privileged true \
-    --audit-log-path /var/log/kubernetes/apiserver.audit.log \
-    --authorization-mode RBAC,Node \
-    --etcd-cafile $ETCD_CA \
-    --etcd-certfile $ETCD_CLIENT_CERT \
-    --etcd-keyfile $ETCD_CLIENT_KEY \
-    --etcd-servers $ENDPOINT \
-    --goaway-chance $GOAWAY_CHANCE \
-    --secure-port 443 \
-    --insecure-port 0 \
-    --client-ca-file $KUBE_CA \
-    --service-account-key-file $SERVICE_ACCOUNT_PUB \
-    --service-account-signing-key-file $SERVICE_ACCOUNT_KEY \
-    --service-cluster-ip-range $SERVICE_CIDR \
-    --tls-cert-file $TLS_CERT_FILE \
-    --tls-private-key-file $TLS_PRIVATE_KEY_FILE \
-    --kubelet-client-certificate $TLS_CERT_FILE \
-    --kubelet-client-key $TLS_PRIVATE_KEY_FILE \
-    -v $LOG_LEVEL \
-    $AWS_AUTH_HOOK_CONFIG
+    --allow-privileged=true \
+    --audit-log-path=/var/log/kubernetes/apiserver.audit.log \
+    --authorization-mode=RBAC,Node \
+    --etcd-cafile=${ETCD_CA} \
+    --etcd-certfile=${ETCD_CLIENT_CERT} \
+    --etcd-keyfile=${ETCD_CLIENT_KEY} \
+    --etcd-servers=https://${ENDPOINT}:2379 \
+    --goaway-chance=${GOAWAY_CHANCE} \
+    --secure-port=443 \
+    --insecure-port=0 \
+    --client-ca-file=${KUBE_CA} \
+    --service-account-issuer=https://${ENDPOINT}:443 \
+    --service-account-key-file=${SERVICE_ACCOUNT_PUB} \
+    --service-account-signing-key-file=${SERVICE_ACCOUNT_KEY} \
+    --service-cluster-ip-range=${SERVICE_CIDR} \
+    --tls-cert-file=${TLS_CERT_FILE} \
+    --tls-private-key-file=${TLS_PRIVATE_KEY_FILE} \
+    --kubelet-client-certificate=${TLS_CERT_FILE} \
+    --kubelet-client-key=${TLS_PRIVATE_KEY_FILE} \
+    -v=${LOG_LEVEL} \
+    ${AWS_AUTH_HOOK_CONFIG}

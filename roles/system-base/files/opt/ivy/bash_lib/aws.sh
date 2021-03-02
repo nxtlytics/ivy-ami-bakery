@@ -311,8 +311,7 @@ EOF
 function get_ssm_param() {
     local PARAMETER_NAME="${1}"
     local REGION="${3:-$(get_region)}"
-    local VALUE=$(aws ssm get-parameter --region "${REGION}" --name "${PARAMETER_NAME}" --with-decryption --output text --query 'Parameter.Value' )
-    echo ${VALUE}
+    aws ssm get-parameter --region "${REGION}" --name "${PARAMETER_NAME}" --with-decryption --output text --query 'Parameter.Value'
 }
 
 function get_secret() {

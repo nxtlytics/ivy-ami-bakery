@@ -41,9 +41,13 @@
 
 - name: download e2d (includes etcd)
   unarchive:
-    src: "https://github.com/criticalstack/e2d/releases/download/v{{ e2d_version }}/e2d_{{ e2d_version }}_Linux_{{ ansible_architecture }}.tar.gz"
+    # Use nxtlytics fork version
+    src: "https://github.com/nxtlytics/e2d/releases/download/v{{ e2d_version }}/e2d_{{ e2d_version }}_Linux_{{ ansible_architecture }}.tar.gz"
+    #src: "https://github.com/criticalstack/e2d/releases/download/v{{ e2d_version }}/e2d_{{ e2d_version }}_Linux_{{ ansible_architecture }}.tar.gz"
     dest: /usr/bin/
     remote_src: yes
+
+# TODO: download etcdctl for browsing etcd (and the wrapper script for setting up the https stuff)
 
 - name: download k8s server components
   get_url:
