@@ -34,6 +34,7 @@ ExecStart=/usr/bin/kube-apiserver \
     --service-cluster-ip-range=${SERVICE_CIDR} \
     --tls-cert-file=${TLS_CERT_FILE} \
     --tls-private-key-file=${TLS_PRIVATE_KEY_FILE} \
+    --kubelet-preferred-address-types=InternalIP,InternalDNS,Hostname,ExternalIP \
     --kubelet-client-certificate=${TLS_CERT_FILE} \
     --kubelet-client-key=${TLS_PRIVATE_KEY_FILE} \
     -v=${LOG_LEVEL} \

@@ -120,6 +120,13 @@
     owner: kubernetes
     group: kubernetes
 
+- name: make log dir for components
+  file:
+    name: /var/log/kubernetes
+    state: directory
+    owner: kubernetes
+    group: kubernetes
+
 - name: copy base kubelet config file
   copy:
     src: etc/kubernetes/kubelet/config.json
