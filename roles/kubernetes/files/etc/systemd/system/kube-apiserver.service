@@ -6,6 +6,7 @@ After=network-online.target
 
 [Service]
 User=kubernetes
+Restart=on-failure
 # Allow apiserver (as kubernetes user) to bind to privileged tcp ports
 AmbientCapabilities=CAP_NET_BIND_SERVICE
 # Common environment variables
