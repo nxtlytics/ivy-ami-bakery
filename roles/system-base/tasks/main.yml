@@ -160,6 +160,12 @@
       - epel
       - newrelic-infra
 
+- name: add datadog agent to the systemd-journal group
+  user:
+    name: dd-agent
+    append: yes
+    groups: systemd-journal
+
 - name: disable newrelic-infra and datadog-agent on first boot
   systemd:
     name: "{{ item }}"
