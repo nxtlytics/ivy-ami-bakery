@@ -79,9 +79,8 @@ function set_hostname() {
         echo "${HOST_LINE}" >> /etc/hosts
     fi
 
-    # Restart rsyslog & datadog since hostname changed
+    # Restart rsyslog since hostname changed
     systemctl restart rsyslog
-    systemctl restart datadog-agent
 }
 
 function get_ram_mb_by_percent() {
@@ -112,16 +111,12 @@ function set_datadog_key() {
 api_key: ${DD_API_KEY}
 bind_host: 0.0.0.0
 EOF
-    systemctl enable datadog-agent
-    systemctl start datadog-agent
 }
 
 function set_newrelic_infra_key() {
     local NRIA_LICENSE_KEY="${1}"
     local NRIA_LICENSE_FILE="${2:-/etc/newrelic-infra.yml}"
     echo "license_key: ${NRIA_LICENSE_KEY}" > "${NRIA_LICENSE_FILE}"
-    systemctl enable newrelic-infra
-    systemctl start newrelic-infra
 }
 
 # Note: the function below requires get_tags function which
@@ -153,13 +148,54 @@ address-metrics = "https://metric-api.${NR_METRICS_DOMAIN}/metric/v1"
 api-key = "${NR_API_KEY}"
 EOF
 
-    systemctl enable gostatsd
-    systemctl start gostatsd
 }
 
 function set_prompt_color() {
     local COLOR=$1
     echo -n "${COLOR}" > /etc/sysconfig/console/color
+}
+
+function setup_docker_storage() {
+  # Setup storage for docker images
+  # Use: setup_docker_storage "/dev/xvdb"
+  local DEVICE="${1}"
+  local MOUNT_PATH="/mnt/docker"
+
+  systemctl stop docker
+  sleep 2
+
+  mkfs.xfs ${DEVICE}
+  mkdir -p ${MOUNT_PATH}
+  mount ${DEVICE} ${MOUNT_PATH}
+
+  rm -rf /var/lib/docker
+  ln -s ${MOUNT_PATH} /var/lib/docker
+
+  # TODO: can probably remove this once it's baked into the AMI(?)
+  echo 'DOCKER_STORAGE_OPTIONS="--storage-driver overlay2"' > /etc/sysconfig/docker-storage
+
+  local FSTAB="${DEVICE} ${MOUNT_PATH} xfs defaults 0 0"
+  sed -i '/${DEVICE}/d' /etc/fstab
+  echo ${FSTAB} >> /etc/fstab
+
+  systemctl enable --now docker
+}
+
+function update_env() {
+  # Update a line in a dotenv file
+  # Use: update_env /etc/sysconfig/aws-iam-authenticator "AWS_AUTH_KUBECONFIG" /etc/kubernetes/aws-iam-authenticator/kubeconfig.yaml
+  local FILE="${1}"
+  local KEY="${2}"
+  local VALUE="${3}"
+
+  # search for value
+  if egrep -q "^${KEY}[[:space:]]*=" ${FILE}; then
+    # if exists, sed it
+    sed -i -e "s#^${KEY}[[:space:]]*=.*#${KEY}=${VALUE}#" ${FILE}
+  else
+    # if not, just cat it to the end of the file
+    echo "${KEY}=${VALUE}" >> ${FILE}
+  fi
 }
 
 case "$(get_cloud)" in
@@ -173,3 +209,5 @@ case "$(get_cloud)" in
         echo 'ERROR: Unknown cloud provider, unable to proceed!'
         ;;
 esac
+
+source $(dirname ${BASH_SOURCE})/bash_lib/k8s.sh
