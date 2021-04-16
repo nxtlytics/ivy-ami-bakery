@@ -12,4 +12,4 @@
   lineinfile:
     dest: "/etc/sysconfig/docker"
     regexp: "OPTIONS="
-    line: 'OPTIONS="--default-ulimit nofile=262144:262144 --bip 172.17.0.1/16 --dns 172.17.0.1 -G docker --log-driver json-file --log-opt max-size=300m --log-opt max-file=3"'
+    line: 'OPTIONS="--default-ulimit nofile=262144:262144 --bip 172.17.0.1/16 -G docker --log-driver json-file --log-opt max-size=300m --log-opt max-file=3"'
