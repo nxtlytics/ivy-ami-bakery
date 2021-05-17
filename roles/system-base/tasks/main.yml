@@ -94,6 +94,12 @@
     dest: /etc/sysctl.d/01-no-icmp-redirect.conf
     mode: 0644
 
+- name: increase maximum mapped file count
+  copy:
+    src: etc/sysctl.d/99-max_map_count.conf
+    dest: /etc/sysctl.d/99-max_map_count.conf
+    mode: 0644
+
 - name: add udev rule to map instance storage to /dev/ephemeral
   copy:
     src: etc/udev/rules.d/99-aws-ephemeral-devices.rules
