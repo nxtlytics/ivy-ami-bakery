@@ -34,13 +34,23 @@ function get_region() {
     echo ${availability_zone%?}
 }
 
-function get_environment() {
+function get_sysenv() {
     local REGION=$(get_region)
     local INSTANCE_ID=$(get_instance_id)
 
     echo $(aws ec2 describe-instances --region ${REGION} \
                                       --instance-id ${INSTANCE_ID} \
                                       --query "Reservations[0].Instances[0].Tags[?Key==\`$(get_ivy_tag):sysenv\`].Value" \
+                                      --output text)
+}
+
+function get_sysenv_alias() {
+    local REGION=$(get_region)
+    local INSTANCE_ID=$(get_instance_id)
+
+    echo $(aws ec2 describe-instances --region ${REGION} \
+                                      --instance-id ${INSTANCE_ID} \
+                                      --query "Reservations[0].Instances[0].Tags[?Key==\`$(get_ivy_tag):sysenvalias\`].Value" \
                                       --output text)
 }
 
@@ -89,7 +99,7 @@ function get_eni_id() {
     local SERVICE=$2
 
     local REGION=$(get_region)
-    local ENV=$(get_environment)
+    local ENV=$(get_sysenv)
     local TAG=$(get_ivy_tag)
     echo $(aws ec2 describe-network-interfaces --region ${REGION} \
            --filters Name=tag:"${TAG}:sysenv",Values="${ENV}" \

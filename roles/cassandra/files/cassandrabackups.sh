@@ -71,13 +71,13 @@ function run_backup() {
     sleep 5
 
     # Tag it!
-    aws ec2 create-tags --region ${MY_REGION} --resources ${SNAPSHOT_ID} --tags Key=Name,Value=${MY_ROLE} Key=$(get_ivy_tag):role,Value=${MY_ROLE} Key=$(get_ivy_tag):environment,Value=$(get_environment) Key=$(get_ivy_tag):service,Value=${MY_SERVICE}
+    aws ec2 create-tags --region ${MY_REGION} --resources ${SNAPSHOT_ID} --tags Key=Name,Value=${MY_ROLE} Key=$(get_ivy_tag):role,Value=${MY_ROLE} Key=$(get_ivy_tag):sysenv,Value=$(get_sysenv) Key=$(get_ivy_tag):service,Value=${MY_SERVICE}
 
     # Delete old snapshots
     CUTOFF_DAY=$(date -d 'now - 7 days' -u +"%Y-%m-%dT00:00:00.000Z")
     IFS=$'\n' && for snapshot in $(aws ec2 describe-snapshots                                                                                           \
         --region ${MY_REGION}                                                                                                                           \
-        --filters Name=tag:"$(get_ivy_tag):environment",Values=$(get_environment) Name=tag:"$(get_ivy_tag):service",Values=${MY_SERVICE} Name=tag:"$(get_ivy_tag):role",Values=${MY_ROLE}   \
+        --filters Name=tag:"$(get_ivy_tag):sysenv",Values=$(get_sysenv) Name=tag:"$(get_ivy_tag):service",Values=${MY_SERVICE} Name=tag:"$(get_ivy_tag):role",Values=${MY_ROLE}   \
         --query 'Snapshots[*].[SnapshotId,StartTime]'                                                                                                   \
         --output text); do
             snapshot_id=$(echo $snapshot | awk '{print $1}')
