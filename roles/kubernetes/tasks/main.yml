@@ -89,8 +89,8 @@
 
 - name: copy dd-agent systemd drop-in
   copy:
-    src: etc/systemd/datadog-agent.service.d/10-kubernetes.conf
-    dest: /etc/systemd/datadog-agent.service.d/10-kubernetes.conf
+    src: etc/systemd/system/datadog-agent.service.d/10-kubernetes.conf
+    dest: /etc/systemd/system/datadog-agent.service.d/10-kubernetes.conf
     mode: 0644
 
 - name: copy component configurations
