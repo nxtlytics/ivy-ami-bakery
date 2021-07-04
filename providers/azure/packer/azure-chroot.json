@@ -1,0 +1,71 @@
+{
+    "variables": {
+        "image_name": "{{env `PACKER_IMAGE_NAME`}}",
+        "image_destination": "{{env `PACKER_IMAGE_USERS`}}",
+        "image_regions": "{{env `PACKER_IMAGE_REGIONS`}}",
+        "source": "{{env `PACKER_SOURCE_IMAGE`}}",
+        "volume_size": "{{env `PACKER_VOLUME_SIZE`}}",
+        "ivy_tag": "{{env `PACKER_IVY_TAG`}}",
+        "datadog_api_key": ""
+    },
+    "builders": [
+        {
+            "type": "azure-chroot",
+            "image_hyperv_generation": "V2",
+            "copy_files": ["/etc/resolv.conf", "/root/bpftrace"],
+            "source": "{{user `source`}}",
+            "image_resource_id": "/subscriptions/{{vm `subscription_id`}}/resourceGroups/{{vm `resource_group`}}/providers/Microsoft.Compute/images/{{user `image_name`}}-{{timestamp}}",
+            "shared_image_destination": {
+                "resource_group": "{{vm `resource_group`}}",
+                "gallery_name": "{{user `image_destination`}}",
+                "image_name": "{{user `image_name`}}",
+                "image_version": "",
+                "exlude_from_latest": "{{user `exlude_from_latest`}}",
+                "target_regions": [
+                    {
+                        "name": "d",
+                        "replicas": "d",
+                        "storage_account_type": "s"
+                    },
+                    {
+                        "name": "d",
+                        "replicas": "d",
+                        "storage_account_type": "s"
+                    }
+                ]
+            },
+            "image_regions": "{{user `image_regions`}}",
+            "chroot_mounts": [
+              ["proc", "proc", "/proc"],
+              ["sysfs", "sysfs", "/sys"],
+              ["bind", "/dev", "/dev"],
+              ["devpts", "devpts", "/dev/pts"],
+              ["binfmt_misc", "binfmt_misc", "/proc/sys/fs/binfmt_misc"],
+              ["tmpfs", "tmpfs", "/dev/shm"],
+              ["bind", "/var/run", "/var/opt"]
+            ],
+            "os_disk_size_gb": "{{user `volume_size`}}"
+        }
+    ],
+    "provisioners": [
+        {
+            "type": "shell",
+            "inline": ["echo 'Bindmounting docker into chroot...'; ln -s /var/opt/docker.sock /var/run/docker.sock || true"]
+        },
+        {
+            "type": "shell",
+            "script": "./providers/azure/packer/prepare.sh"
+        },
+        {
+            "type": "ansible-local",
+            "playbook_file": "./providers/amazon/images/{{user `ami_name`}}/provision.yml",
+            "playbook_dir": "./roles",
+            "extra_arguments": [ "--extra-vars \"ivy_tag={{user `ivy_tag`}} datadog_api_key={{user `datadog_api_key`}}\"" ],
+            "clean_staging_directory": true
+        },
+        {
+            "type": "shell",
+            "inline": ["echo 'Removing docker symlink...'; rm /var/run/docker.sock"]
+        }
+    ]
+}

@@ -1,0 +1,7 @@
+---
+- name: Provision a machine
+  hosts: 127.0.0.1
+  user: ec2-user
+  connection: local
+  roles:
+    - cassandra
