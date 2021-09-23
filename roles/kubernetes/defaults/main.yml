@@ -8,4 +8,4 @@ cni_version: "0.9.0"
 # iam auth version to download from github
 iam_authenticator_version: "0.5.2"
 # cloud lifecycle controller version to download from github
-cloud_lifecycle_controller_version: "0.0.1"
+cloud_lifecycle_controller_version: "0.0.2"
