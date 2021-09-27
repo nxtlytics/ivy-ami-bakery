@@ -1,0 +1,8 @@
+---
+- name: add azure to cloud-init datasources
+  copy:
+    src: etc/cloud/cloud.cfg.d/00-azure-compat.cfg
+    dest: /etc/cloud/cloud.cfg.d/00-azure-compat.cfg
+    owner: root
+    group: root
+  when: enable_azure_compat == "true"

@@ -6,6 +6,7 @@
   roles:
     - system-base
     - dnsmasq
+    - azure-compat
     - docker
     - kubernetes
   vars:
