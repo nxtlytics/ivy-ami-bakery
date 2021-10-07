@@ -1,0 +1,29 @@
+--- /usr/lib/python2.7/site-packages/cloudinit/url_helper.py
++++ /usr/lib/python2.7/site-packages/cloudinit/url_helper.py.fix
+@@ -101,7 +101,7 @@
+             raise UrlError(cause=e, code=code, headers=None, url=url)
+         return FileResponse(file_path, contents=contents)
+     else:
+-        return readurl(url, timeout=timeout, retries=retries,
++        return readurl(url, timeout=timeout, retries=retries, headers=headers,
+                        headers_cb=headers_cb, data=data,
+                        sec_between=sec_between, ssl_details=ssl_details,
+                        exception_cb=exception_cb)
+
+--- /usr/lib/python2.7/site-packages/cloudinit/config/cc_write_metadata.py
++++ /usr/lib/python2.7/site-packages/cloudinit/config/cc_write_metadata.py.fix
+@@ -122,10 +122,10 @@ def retrieve_metadata(path, data, cloud, log):
+                         return value
+                     except Exception as exc:
+                         # don't return anything, we proceed to the next datum
+-                        log.warn('using path "%(path)s" against %(dataset)s '
+-                                 'failed: %(exctype)s: %(excmsg)s',
+-                                 path=datum[dataset], dataset=dataset,
+-                                 exctype=type(exc).__name__, excmsg=str(exc))
++                        log.warn('using path "%s" against %s '
++                                 'failed: %s: %s',
++                                 datum[dataset], dataset,
++                                 type(exc).__name__, str(exc))
+
+     # if we reached this point, all attempts to get the data we want
+     # failed, and there wasn't a fallback
