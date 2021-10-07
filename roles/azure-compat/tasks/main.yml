@@ -5,4 +5,15 @@
     dest: /etc/cloud/cloud.cfg.d/00-azure-compat.cfg
     owner: root
     group: root
-  when: enable_azure_compat == "true"
+
+- name: copy cloud-init patch
+  copy:
+    src: tmp/cloud-init.patch
+    dest: /tmp/cloud-init.patch
+    owner: root
+    group: root
+
+- name: patch cloud-init
+  command:
+    cmd: patch -d/ -p0 -N -i /tmp/cloud-init.patch -r /dev/null
+  ignore_errors: yes

@@ -3,10 +3,13 @@
   hosts: 127.0.0.1
   user: ec2-user
   connection: local
+  vars:
+    enable_azure_compat: true
   roles:
     - system-base
     - dnsmasq
-    - azure-compat
+    - role: azure-compat
+      when: enable_azure_compat == "true"
     - docker
     - kubernetes
   vars:
