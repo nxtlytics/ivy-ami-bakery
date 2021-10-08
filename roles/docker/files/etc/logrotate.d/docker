@@ -1,8 +1,0 @@
-/var/log/docker {
-  rotate 7
-  size 1024M
-  daily
-  compress
-  delaycompress
-  copytruncate
-}

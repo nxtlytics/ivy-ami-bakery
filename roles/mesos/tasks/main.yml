@@ -1,17 +1,3 @@
 ---
 # Use specific install tasks for each OS family
 - include: "{{ ansible_distribution }}.yml"
-
-- name: copy shell scripts
-  copy:
-    src: "opt/ivy/{{ item }}"
-    dest: "/opt/ivy/{{ item }}"
-    mode: 0755
-  with_items:
-    - cleanup_docker.sh
-
-- name: enable docker cleanup
-  copy:
-    src: "etc/cron.daily/cleanup_docker.cron"
-    dest: "/etc/cron.daily/cleanup_docker.cron"
-    mode: 0755

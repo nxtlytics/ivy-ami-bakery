@@ -12,10 +12,19 @@
     append: yes
     groups: docker
 
-- name: setup docker logrotation
+- name: copy shell scripts
   copy:
-    src: etc/logrotate.d/docker
-    dest: /etc/logrotate.d/docker
+    src: "opt/ivy/{{ item }}"
+    dest: "/opt/ivy/{{ item }}"
+    mode: 0755
+  with_items:
+    - cleanup_docker.sh
+
+- name: enable docker cleanup
+  copy:
+    src: "etc/cron.daily/cleanup_docker.cron"
+    dest: "/etc/cron.daily/cleanup_docker.cron"
+    mode: 0755
 
 - name: ensure docker enabled
   systemd:
