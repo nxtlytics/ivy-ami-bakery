@@ -14,6 +14,11 @@ if [[ -z "${IVY}" ]]; then
     return 255
 fi
 
+function az_login() {
+  # infinite retry loop to log into azure using the system identity
+  retry az login --identity
+}
+
 function get_availability_zone() {
     curl -H 'Metadata:true' --retry 3 --silent --fail 'http://169.254.169.254/metadata/instance/compute?api-version=2019-06-01' | jq -r '.zone'
 }
@@ -106,5 +111,5 @@ function get_group() {
 
 function get_keyvault_key() {
     local KEY_URI=${1}
-    az keyvault secret show --id "${KEY_URI}" --query 'value' -o tsv
+    retry az keyvault secret show --id "${KEY_URI}" --query 'value' -o tsv
 }

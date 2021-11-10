@@ -8,7 +8,7 @@ E2D_NAME=
 E2D_REQUIRED_CLUSTER_SIZE=3
 
 # how to discover peers (aws-autoscaling-group,ec2-tags)
-E2D_PEER_DISCOVERY=
+#E2D_PEER_DISCOVERY=
 
 # where to store the etcd data
 E2D_DATA_DIR=/var/lib/etcd/data

@@ -198,6 +198,18 @@ function update_env() {
   fi
 }
 
+function warn() {
+    local MESSAGE=${1}
+    echo "[WARN] ${MESSAGE}" >&2
+}
+
+function retry() {
+    until "$@"; do
+      warn "Waiting for '$@' to succeed, sleeping 5 seconds"
+      sleep 5
+    done
+}
+
 case "$(get_cloud)" in
     aws)
         source $(dirname ${BASH_SOURCE})/bash_lib/aws.sh
