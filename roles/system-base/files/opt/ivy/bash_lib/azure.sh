@@ -35,6 +35,12 @@ function get_instance_type() {
     curl -H 'Metadata:true' --retry 3 --silent --fail 'http://169.254.169.254/metadata/instance/compute?api-version=2019-06-01' | jq -r '.vmSize'
 }
 
+# In azure get_provider_id is basically aliased to get_resource_id. This gives
+# us a common function call between aws and azure.
+function get_provider_id() {
+    echo "azure://$(get_resource_id)"
+}
+
 function get_name() {
     # returns computerName, in a vmss this is `${computerNamePrefix}_${index}`
     curl -H 'Metadata:true' --retry 3 --silent --fail 'http://169.254.169.254/metadata/instance/compute?api-version=2019-06-01' | jq -r '.name'

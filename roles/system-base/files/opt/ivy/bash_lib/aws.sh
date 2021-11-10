@@ -29,6 +29,10 @@ function get_instance_type() {
     echo $(curl --retry 3 --silent --fail http://169.254.169.254/latest/meta-data/instance-type)
 }
 
+function get_provider_id() {
+    echo "aws://$(get_availability_zone)/$(get_instance_id)"
+}
+
 function get_availability_zone() {
     echo $(curl --retry 3 --silent --fail http://169.254.169.254/latest/meta-data/placement/availability-zone)
 }
