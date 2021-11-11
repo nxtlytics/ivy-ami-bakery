@@ -17,3 +17,15 @@
   command:
     cmd: patch -d/ -p0 -N -i /tmp/cloud-init.patch -r /dev/null
   ignore_errors: yes
+
+# amazon linux now hyper-optimizes the dracut initramfs to exclude the generic 'kernel-modules' package
+# unfortunately this removes the scsi module and prevents scsi based virtualization layers from booting the system
+- name: remove dracut module exclusions
+  replace:
+    path: /etc/dracut.conf.d/ec2.conf
+    regexp: 'kernel-modules'
+    replace: ''
+
+- name: regenerate initramfs to include missing kernel drivers
+  command:
+    cmd: dracut -f
