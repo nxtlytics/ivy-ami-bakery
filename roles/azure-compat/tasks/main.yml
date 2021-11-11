@@ -26,6 +26,7 @@
     regexp: 'kernel-modules'
     replace: ''
 
+# regenerate any initramfs that have been installed on the system since they're missing the right drivers
 - name: regenerate initramfs to include missing kernel drivers
   command:
-    cmd: dracut -f
+    cmd: dracut -f --regenerate-all
