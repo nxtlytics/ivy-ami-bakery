@@ -107,11 +107,6 @@
     dest: /etc/systemd/system/datadog-agent.service.d/10-kubernetes.conf
     mode: 0644
 
-- name: make sysctl.d drop-in directory
-  file:
-    name: /etc/sysctl.d/
-    state: directory
-
 - name: copy ipv4.ip_forward drop-in
   copy:
     src: etc/sysctl.d/02-ipv4-forward.conf
