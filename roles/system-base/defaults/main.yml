@@ -1,3 +1,4 @@
 ---
 # Minimum version of the kernel package that should be installed by this role
 kernel_min: "5.10"
+yq_version: "4.16.1"

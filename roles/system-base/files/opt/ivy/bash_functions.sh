@@ -113,6 +113,16 @@ bind_host: 0.0.0.0
 EOF
 }
 
+function enable_datadog_cloud_secutiry() {
+    local SYSTEM_PROBE_CONFIG_FILE="/etc/datadog-agent/system-probe.yaml"
+    local SECURITY_AGENT_CONFIG_FILE="/etc/datadog-agent/security-agent.yaml"
+    mv "${SYSTEM_PROBE_CONFIG_FILE}.example" "${SYSTEM_PROBE_CONFIG_FILE}"
+    mv "${SECURITY_AGENT_CONFIG_FILE}.example" "${SECURITY_AGENT_CONFIG_FILE}"
+    yq e -i '.runtime_security_config.enabled = true' "${SYSTEM_PROBE_CONFIG_FILE}"
+    yq e -i '.runtime_security_config.enabled = true' "${SECURITY_AGENT_CONFIG_FILE}"
+    yq e -i '.compliance_config.enabled = true' "${SECURITY_AGENT_CONFIG_FILE}"
+}
+
 function set_newrelic_infra_key() {
     local NRIA_LICENSE_KEY="${1}"
     local NRIA_LICENSE_FILE="${2:-/etc/newrelic-infra.yml}"

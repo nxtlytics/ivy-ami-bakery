@@ -203,6 +203,12 @@
     name: "*"
     state: latest
 
+- name: install yq
+  get_url:
+    url: "https://github.com/mikefarah/yq/releases/download/v{{ yq_version }}/yq_linux_amd64"
+    dest: /usr/bin/yq
+    mode: 0755
+
 - name: download and unarchive awscli v2
   unarchive:
     src: https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip
