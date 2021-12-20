@@ -113,7 +113,7 @@ bind_host: 0.0.0.0
 EOF
 }
 
-function enable_datadog_cloud_secutiry() {
+function enable_datadog_cloud_security() {
     local SYSTEM_PROBE_CONFIG_FILE="/etc/datadog-agent/system-probe.yaml"
     local SECURITY_AGENT_CONFIG_FILE="/etc/datadog-agent/security-agent.yaml"
     mv "${SYSTEM_PROBE_CONFIG_FILE}.example" "${SYSTEM_PROBE_CONFIG_FILE}"
