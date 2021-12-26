@@ -104,8 +104,8 @@ function get_packer_vars() {
             ARGUMENTS_TO_PASS+=("-var ${i}")
         done
     else
-	echo ""
-	return
+	    echo ""
+	    return
     fi
     echo "${ARGUMENTS_TO_PASS[@]}"
 }
