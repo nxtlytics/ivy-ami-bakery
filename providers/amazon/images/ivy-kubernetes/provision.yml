@@ -7,3 +7,7 @@
     - system-base
     - docker
     - kubernetes
+  vars:
+    # this file is for backwards compatibility with the existing 1.20 kubernetes clusters
+    # we will eventually remove and deprecate the unversioned AMIs
+    k8s_version: "1.20.0"
