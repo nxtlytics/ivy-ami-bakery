@@ -31,6 +31,8 @@ function set_ivy_tag() {
 }
 
 function get_cloud() {
+  # TODO: replace this with calls to cloud-init's metadata store
+
   # Discover the current cloud platform. Very rudimentary, could fail eventually, but since 'compute' is
   # Google's trademark word for their service, it's not likely that AWS suddenly has this value.
   local CLOUD_PROVIDER_FILE='/var/lib/cloud_provider'
