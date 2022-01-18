@@ -1,0 +1,12 @@
+---
+- name: Provision a machine
+  hosts: 127.0.0.1
+  user: ec2-user
+  connection: local
+  roles:
+    - system-base
+    - docker
+    - kubernetes
+  vars:
+    # this builds a 1.21.x compatible cluster AMI
+    k8s_version: "1.21.8"
