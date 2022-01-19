@@ -30,7 +30,7 @@ function get_instance_type() {
 }
 
 function get_provider_id() {
-    echo "aws://$(get_availability_zone)/$(get_instance_id)"
+    echo "aws:///$(get_availability_zone)/$(get_instance_id)"
 }
 
 function get_availability_zone() {
