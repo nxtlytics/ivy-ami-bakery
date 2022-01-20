@@ -126,7 +126,7 @@
     name:
       - bcc
       - curl
-      - datadog-agent
+      - "datadog-agent-{{ dd_version }}"
       - ethtool
       - gcc
       - git
