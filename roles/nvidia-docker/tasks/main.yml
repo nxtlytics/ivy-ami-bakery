@@ -1,0 +1,72 @@
+- name: "[nvidia-docker] Install GCCv10"
+  package:
+    name: gcc10.x86_64
+    state: present
+
+- name: "[nvidia-docker] Save previos GCC binary"
+  copy:
+    remote_src: True
+    src: /bin/gcc
+    dest: /bin/gcc-legacy # TODO: old version in name?
+    mode: 755
+- file:
+    path: /bin/gcc
+    state: absent
+
+- name: "[nvidia-docker] Set GCCv10 the default one via symlink"
+  file:
+    src: /bin/gcc10-gcc
+    dest: /bin/gcc
+    state: link
+
+- name: "[nvidia-docker] Remove nouveau kernel module"
+  modprobe:
+    name: nouveau
+    state: absent
+
+- name: "[nvidia-docker] Disable nouveau kernel module"
+  copy:
+    dest: /usr/lib/modprobe.d/nvidia-installer-disable-nouveau.conf
+    content: |
+      blacklist nouveau
+      options nouveau modeset=0
+
+- name: "[nvidia-docker] Download nvidia-{{ nvidia_driver_version }} driver"
+  get_url:
+    url: "https://us.download.nvidia.com/XFree86/Linux-x86_64/{{ nvidia_driver_version }}/NVIDIA-Linux-x86_64-{{ nvidia_driver_version }}.run"
+    dest: "/root/NVIDIA-{{ nvidia_driver_version }}.run"
+
+- name: "[nvidia-docker] Install nvidia-{{ nvidia_driver_version }} driver"
+  shell: "sh /root/NVIDIA-{{ nvidia_driver_version }}.run --silent"
+  register: nvidia_install_log
+
+- name: "[nvidia-docker] Install nvidia-{{ nvidia_driver_version }} log"
+  debug: 
+    msg: "{{ nvidia_install_log.stdout_lines }}"
+
+- name: "[nvidia-docker] nvidia-docker repo"
+  # TODO: rewrite this to yum_repositiry
+  shell: "curl -s -L https://nvidia.github.io/nvidia-docker/$(. /etc/os-release;echo $ID$VERSION_ID)/nvidia-docker.repo | sudo tee /etc/yum.repos.d/nvidia-docker.repo"
+
+- name: "[nvidia-docker] Install nvidia-docker2"
+  yum:
+    name: nvidia-docker2
+    state: present
+    disable_gpg_check: true # TODO: import GPG
+
+- name: "[nvidia-docker] Install nvidia-docker2"
+  systemd:
+    name: docker
+    state: restarted
+
+- name: "[nvidia-docker] validate host driver"
+  shell: "nvidia-smi"
+  register: validate_nvidia_host
+- debug:
+    msg: "{{ validate_nvidia_host.stdout }}"
+
+- name: "[nvidia-docker] validate docker driver"
+  shell: "docker run --rm --gpus all nvidia/cuda:11.6.0-runtime-centos7 nvidia-smi"
+  register: validate_nvidia_docker
+- debug:
+    msg: "{{ validate_nvidia_docker.stdout }}"
