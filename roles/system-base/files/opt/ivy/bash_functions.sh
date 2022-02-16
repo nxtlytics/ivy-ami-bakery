@@ -117,9 +117,11 @@ function enable_datadog_cloud_security() {
     local SYSTEM_PROBE_CONFIG_FILE="/etc/datadog-agent/system-probe.yaml"
     local SECURITY_AGENT_CONFIG_FILE="/etc/datadog-agent/security-agent.yaml"
     if [[ ! -e "${SYSTEM_PROBE_CONFIG_FILE}" ]]; then
-      sudo -u dd-agent cp "${SYSTEM_PROBE_CONFIG_FILE}.example" "${SYSTEM_PROBE_CONFIG_FILE}"
+      install -o dd-agent -g dd-agent \
+          "${SYSTEM_PROBE_CONFIG_FILE}.example" "${SYSTEM_PROBE_CONFIG_FILE}"
     fi
-    sudo -u dd-agent cp "${SECURITY_AGENT_CONFIG_FILE}.example" "${SECURITY_AGENT_CONFIG_FILE}"
+    install -o dd-agent -g dd-agent \
+        "${SECURITY_AGENT_CONFIG_FILE}.example" "${SECURITY_AGENT_CONFIG_FILE}"
     yq e -i '.runtime_security_config.enabled = true' "${SYSTEM_PROBE_CONFIG_FILE}"
     yq e -i '.runtime_security_config.enabled = true' "${SECURITY_AGENT_CONFIG_FILE}"
     yq e -i '.compliance_config.enabled = true' "${SECURITY_AGENT_CONFIG_FILE}"
@@ -128,7 +130,8 @@ function enable_datadog_cloud_security() {
 function enable_datadog_network_monitoring() {
     local SYSTEM_PROBE_CONFIG_FILE="/etc/datadog-agent/system-probe.yaml"
     if [[ ! -e "${SYSTEM_PROBE_CONFIG_FILE}" ]]; then
-      sudo -u dd-agent cp "${SYSTEM_PROBE_CONFIG_FILE}.example" "${SYSTEM_PROBE_CONFIG_FILE}"
+      install -o dd-agent -g dd-agent \
+          "${SYSTEM_PROBE_CONFIG_FILE}.example" "${SYSTEM_PROBE_CONFIG_FILE}"
     fi
     yq e -i '.network_config.enabled = true' "${SYSTEM_PROBE_CONFIG_FILE}"
 }
