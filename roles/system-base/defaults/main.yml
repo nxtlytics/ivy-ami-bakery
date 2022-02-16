@@ -1,5 +1,5 @@
 ---
-dd_version: "7.32.4"
+dd_version: "7.33.1"
 # Minimum version of the kernel package that should be installed by this role
 kernel_min: "5.10"
 yq_version: "4.16.1"
