@@ -116,11 +116,24 @@ EOF
 function enable_datadog_cloud_security() {
     local SYSTEM_PROBE_CONFIG_FILE="/etc/datadog-agent/system-probe.yaml"
     local SECURITY_AGENT_CONFIG_FILE="/etc/datadog-agent/security-agent.yaml"
-    mv "${SYSTEM_PROBE_CONFIG_FILE}.example" "${SYSTEM_PROBE_CONFIG_FILE}"
-    mv "${SECURITY_AGENT_CONFIG_FILE}.example" "${SECURITY_AGENT_CONFIG_FILE}"
+    if [[ ! -e "${SYSTEM_PROBE_CONFIG_FILE}" ]]; then
+      install -o dd-agent -g dd-agent \
+          "${SYSTEM_PROBE_CONFIG_FILE}.example" "${SYSTEM_PROBE_CONFIG_FILE}"
+    fi
+    install -o dd-agent -g dd-agent \
+        "${SECURITY_AGENT_CONFIG_FILE}.example" "${SECURITY_AGENT_CONFIG_FILE}"
     yq e -i '.runtime_security_config.enabled = true' "${SYSTEM_PROBE_CONFIG_FILE}"
     yq e -i '.runtime_security_config.enabled = true' "${SECURITY_AGENT_CONFIG_FILE}"
     yq e -i '.compliance_config.enabled = true' "${SECURITY_AGENT_CONFIG_FILE}"
+}
+
+function enable_datadog_network_monitoring() {
+    local SYSTEM_PROBE_CONFIG_FILE="/etc/datadog-agent/system-probe.yaml"
+    if [[ ! -e "${SYSTEM_PROBE_CONFIG_FILE}" ]]; then
+      install -o dd-agent -g dd-agent \
+          "${SYSTEM_PROBE_CONFIG_FILE}.example" "${SYSTEM_PROBE_CONFIG_FILE}"
+    fi
+    yq e -i '.network_config.enabled = true' "${SYSTEM_PROBE_CONFIG_FILE}"
 }
 
 function set_newrelic_infra_key() {
