@@ -19,6 +19,7 @@ function usage () {
 }
 
 ASK='no'
+EXPLAIN='no'
 while [[ $# -gt 0 ]]; do
   case "${1}" in
       -a|--ask-to-continue)
@@ -26,7 +27,7 @@ while [[ $# -gt 0 ]]; do
         shift # past argument
         ;;
       -e|--explain)
-        EXPLAIN=1
+        EXPLAIN='yes'
         shift # past argument
         ;;
       -s|--stack-name)
