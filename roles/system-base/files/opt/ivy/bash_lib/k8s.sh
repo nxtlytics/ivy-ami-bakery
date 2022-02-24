@@ -152,4 +152,82 @@ users:
 EOT
 }
 
+function k8s_controller_checks() {
+  local EXPLAIN="${1:-yes}"
+  local ASK="${2}"
+  echo -e "\e[31m =============================================\e[0m"
+  echo -e "\e[31m e2d status should be running without errors  \e[0m"
+  echo -e "\e[31m =============================================\e[0m"
+  systemctl status e2d
 
+  e="e2d is a command-line tool for deploying and managing etcd clusters, both in the cloud or on
+bare-metal. It also includes e2db, an ORM-like abstraction for working with etcd."
+  explain "${EXPLAIN}" "${e}"
+  ask_to_continue "${ASK}"
+
+  echo -e "\e[31m ==========================\e[0m"
+  echo -e "\e[31m Confirm you have 3 members\e[0m"
+  echo -e "\e[31m ==========================\e[0m"
+  /opt/ivy/etcdctl.sh -w table member list
+  ask_to_continue "${ASK}"
+
+  echo -e "\e[31m ================================== \e[0m"
+  echo -e "\e[31m Confirm 3 etcd members are healthy \e[0m"
+  echo -e "\e[31m ================================== \e[0m"
+  /opt/ivy/etcdctl.sh -w table endpoint health
+  ask_to_continue "${ASK}"
+
+  echo -e "\e[31m ========================= \e[0m"
+  echo -e "\e[31m Confirm there is 1 leader \e[0m"
+  echo -e "\e[31m ========================= \e[0m"
+  /opt/ivy/etcdctl.sh -w table endpoint status
+  ask_to_continue "${ASK}"
+
+  echo -e "\e[31m ========================= \e[0m"
+  echo -e "\e[31m kube-apiserver is running \e[0m"
+  echo -e "\e[31m ========================= \e[0m"
+  systemctl status kube-apiserver
+  ask_to_continue "${ASK}"
+
+  echo -e "\e[31m ===================================== \e[0m"
+  echo -e "\e[31m cloud-lifecycle-controller is running \e[0m"
+  echo -e "\e[31m ===================================== \e[0m"
+  systemctl status cloud-lifecycle-controller
+  ask_to_continue "${ASK}"
+}
+
+function k8s_checks() {
+  local EXPLAIN="${1:-yes}"
+  local ASK="${2}"
+  echo -e "\e[31m ============================================== \e[0m"
+  echo -e "\e[31m Confirm controller/agent is recognized as such \e[0m"
+  echo -e "\e[31m ============================================== \e[0m"
+  kubectl --kubeconfig /etc/kubernetes/kubelet/kubeconfig.yaml get nodes
+  ask_to_continue "${ASK}"
+
+  echo -e "\e[31m ====================================== \e[0m"
+  echo -e "\e[31m Confirm csr(s) are Issued and Approved \e[0m"
+  echo -e "\e[31m ====================================== \e[0m"
+  kubectl --kubeconfig /etc/kubernetes/kubelet/kubeconfig.yaml get csr
+  ask_to_continue "${ASK}"
+
+  echo -e "\e[31m ============================================ \e[0m"
+  echo -e "\e[31m Confirm datadog-agent is configured properly \e[0m"
+  echo -e "\e[31m ============================================ \e[0m"
+  datadog-agent status
+  ask_to_continue "${ASK}"
+
+  echo -e "\e[31m ===================================================== \e[0m"
+  echo -e "\e[31m Confirm aws-vpc-cni-hairpinning exited without errors \e[0m"
+  echo -e "\e[31m ===================================================== \e[0m"
+  systemctl status aws-vpc-cni-hairpinning
+  ask_to_continue "${ASK}"
+
+  echo -e "\e[31m =============================================================== \e[0m"
+  echo -e "\e[31m Confirm line: 'NXTLYTICS, hairpin all incoming' is listed below \e[0m"
+  echo -e "\e[31m =============================================================== \e[0m"
+  iptables -t mangle --numeric --list --verbose
+  e="See https://en.wikipedia.org/wiki/Hairpinning
+and https://github.com/aws/amazon-vpc-cni-k8s/blob/master/docs/cni-proposal.md#solution-components"
+  explain "${EXPLAIN}" "${e}"
+}
