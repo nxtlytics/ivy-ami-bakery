@@ -46,7 +46,7 @@ if [[ -z ${STACK_NAME:-""} ]] ; then
 fi
 
 warn 'Always check: /var/log/cloud-init*'
-warn 'You may ran: tail -F /var/log/cloud-init*'
+warn 'You may run: tail -F /var/log/cloud-init*'
 
 if [[ "${STACK_NAME}" == 'k8s-controllers' ]]; then
   k8s_controller_checks "${EXPLAIN}" "${ASK}"
