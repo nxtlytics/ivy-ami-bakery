@@ -221,6 +221,23 @@ function update_env() {
   fi
 }
 
+function ask_to_continue(){
+  local ASK="${1:-yes}"
+  if [[ "${ASK}" == 'yes' ]]; then
+    echo -e "\e[31m press [enter] to continue \e[0m"
+    read -p ""
+  fi
+}
+
+function explain(){
+  local EXPLAIN="${1:-yes}"
+  local MESSAGE="${2}"
+  if [[ "${EXPLAIN}" == 'yes' ]]; then
+    echo -e "\e[36m ${MESSAGE} \e[0m"
+  fi
+}
+
+
 function warn() {
     local MESSAGE=${1}
     echo "[WARN] ${MESSAGE}" >&2
