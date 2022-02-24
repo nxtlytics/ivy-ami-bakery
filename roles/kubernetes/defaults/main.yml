@@ -1,6 +1,6 @@
 ---
 # e2d version
-e2d_version: "0.4.14-nxt+4"
+e2d_version: "0.4.14-nxt+6"
 # etcd version (for etcdctl)
 etcd_version: "3.5.0"
 # default kubernetes version - should match (close-ish) the version of the masters
