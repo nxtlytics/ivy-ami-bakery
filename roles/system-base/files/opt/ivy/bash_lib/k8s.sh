@@ -152,13 +152,26 @@ users:
 EOT
 }
 
+function check_systemctl_status() {
+  local UNIT="${1}"
+  local STATUS="${2:-running}"
+  local SYSTEMCTL_OUTPUT VALID_STATUS
+  SYSTEMCTL_OUTPUT="$(systemctl status "${UNIT}")"
+  VALID_STATUS="Active: active (${STATUS})"
+  if ! grep -q "${VALID_STATUS}" <<<"${SYSTEMCTL_OUTPUT}"; then
+    echo "${UNIT} status is NOT: ${VALID_STATUS}"
+    return 1
+  fi
+  echo "${SYSTEMCTL_OUTPUT}"
+}
+
 function k8s_controller_checks() {
   local EXPLAIN="${1:-yes}"
   local ASK="${2}"
   echo -e "\e[31m =============================================\e[0m"
   echo -e "\e[31m e2d status should be running without errors  \e[0m"
   echo -e "\e[31m =============================================\e[0m"
-  systemctl status e2d
+  check_systemctl_status 'e2d' 'running'
 
   e="e2d is a command-line tool for deploying and managing etcd clusters, both in the cloud or on
 bare-metal. It also includes e2db, an ORM-like abstraction for working with etcd."
@@ -186,13 +199,13 @@ bare-metal. It also includes e2db, an ORM-like abstraction for working with etcd
   echo -e "\e[31m ========================= \e[0m"
   echo -e "\e[31m kube-apiserver is running \e[0m"
   echo -e "\e[31m ========================= \e[0m"
-  systemctl status kube-apiserver
+  check_systemctl_status 'kube-apiserver' 'running'
   ask_to_continue "${ASK}"
 
   echo -e "\e[31m ===================================== \e[0m"
   echo -e "\e[31m cloud-lifecycle-controller is running \e[0m"
   echo -e "\e[31m ===================================== \e[0m"
-  systemctl status cloud-lifecycle-controller
+  check_systemctl_status 'cloud-lifecycle-controller' 'running'
   ask_to_continue "${ASK}"
 }
 
@@ -220,7 +233,7 @@ function k8s_checks() {
   echo -e "\e[31m ===================================================== \e[0m"
   echo -e "\e[31m Confirm aws-vpc-cni-hairpinning exited without errors \e[0m"
   echo -e "\e[31m ===================================================== \e[0m"
-  systemctl status aws-vpc-cni-hairpinning
+  check_systemctl_status 'aws-vpc-cni-hairpinning' 'exited'
   ask_to_continue "${ASK}"
 
   echo -e "\e[31m =============================================================== \e[0m"
