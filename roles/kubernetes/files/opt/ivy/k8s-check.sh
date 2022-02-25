@@ -10,7 +10,7 @@ PADDING=$(printf %-${#THIS_SCRIPT}s " ")
 
 function usage () {
   echo "Usage:"
-  echo "${THIS_SCRIPT} -b,--batch <Set this flag to run all checks one after the other>"
+  echo "${THIS_SCRIPT} -a,--ask-to-continue <Set this flag to ask before running next check>"
   echo "${PADDING} -e, --explain <Set this flag to print all checks explanations>"
   echo "${PADDING} -s, --stack-name <Name of the stack this instance is a part of>"
   echo
