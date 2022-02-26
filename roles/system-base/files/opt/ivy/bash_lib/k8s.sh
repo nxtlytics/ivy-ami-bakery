@@ -152,26 +152,43 @@ users:
 EOT
 }
 
+function get_k8s_node_name() {
+  local INSTANCE_ID NODE_LABEL JSON_PATH
+  INSTANCE_ID="$(get_instance_id)"
+  JSON_PATH='{.items[0].metadata.name}'
+  NODE_LABEL="node.kubernetes.io/instance-id=${INSTANCE_ID}"
+  kubectl get nodes \
+    --kubeconfig /etc/kubernetes/kubelet/kubeconfig.yaml \
+    -l "${NODE_LABEL}" -o jsonpath="${JSON_PATH}" 2>/dev/null
+}
+
+function get_k8s_node_status() {
+  local INSTANCE_ID NODE_LABEL
+  INSTANCE_ID="$(get_instance_id)"
+  NODE_LABEL="node.kubernetes.io/instance-id=${INSTANCE_ID}"
+  kubectl get nodes \
+    --kubeconfig /etc/kubernetes/kubelet/kubeconfig.yaml \
+    -l "${NODE_LABEL}" | grep -v NAME | awk '{ print $2 }'
+}
+
 function check_systemctl_status() {
   local UNIT="${1}"
-  local STATUS="${2:-running}"
-  local SYSTEMCTL_OUTPUT VALID_STATUS
-  SYSTEMCTL_OUTPUT="$(systemctl status "${UNIT}")"
-  VALID_STATUS="Active: active (${STATUS})"
-  if ! grep -q "${VALID_STATUS}" <<<"${SYSTEMCTL_OUTPUT}"; then
-    echo "${UNIT} status is NOT: ${VALID_STATUS}"
+  if ! grep -q 'active' <(systemctl is-active "${UNIT}"); then
+    echo "${UNIT} status is NOT: active"
     return 1
   fi
-  echo "${SYSTEMCTL_OUTPUT}"
 }
 
 function k8s_controller_checks() {
   local EXPLAIN="${1:-yes}"
   local ASK="${2}"
+  local e endpoint health errors leader
+  declare -a ETCD_MEMBERS ETCD_LEADERS
+
   echo -e "\e[31m =============================================\e[0m"
   echo -e "\e[31m e2d status should be running without errors  \e[0m"
   echo -e "\e[31m =============================================\e[0m"
-  check_systemctl_status 'e2d' 'running'
+  check_systemctl_status 'e2d'
 
   e="e2d is a command-line tool for deploying and managing etcd clusters, both in the cloud or on
 bare-metal. It also includes e2db, an ORM-like abstraction for working with etcd."
@@ -181,42 +198,79 @@ bare-metal. It also includes e2db, an ORM-like abstraction for working with etcd
   echo -e "\e[31m ==========================\e[0m"
   echo -e "\e[31m Confirm you have 3 members\e[0m"
   echo -e "\e[31m ==========================\e[0m"
-  /opt/ivy/etcdctl.sh -w table member list
+  #/opt/ivy/etcdctl.sh -w table member list
+  ETCD_MEMBERS=()
+  mapfile -t ETCD_MEMBERS < <(/opt/ivy/etcdctl.sh member list)
+  if [[ ${#ETCD_MEMBERS[@]} -ne 3 ]];
+    warn "You only have ${#ETCD_MEMBERS[@]} etcd members but you should have 3"
+    return 1
+  fi
   ask_to_continue "${ASK}"
 
   echo -e "\e[31m ================================== \e[0m"
   echo -e "\e[31m Confirm 3 etcd members are healthy \e[0m"
   echo -e "\e[31m ================================== \e[0m"
-  /opt/ivy/etcdctl.sh -w table endpoint health
+  #/opt/ivy/etcdctl.sh -w table endpoint health
+  while IFS= read -r line; do
+    health="$(cut -d '|' -f3 <(echo "${line}")|xargs)"
+    if [[ "${health}" != 'true' ]]; then
+      endpoint="$(cut -d '|' -f2 <(echo "${line}")|xargs)"
+      errors="$(cut -d '|' -f5 <(echo "${line}"))"
+      warn "endpoint ${endpoint} is not healthy and has errors: ${errors}"
+      return 1
+    fi
+  done < <(grep 'https' <(/opt/ivy/etcdctl.sh -w table endpoint health))
   ask_to_continue "${ASK}"
 
   echo -e "\e[31m ========================= \e[0m"
   echo -e "\e[31m Confirm there is 1 leader \e[0m"
   echo -e "\e[31m ========================= \e[0m"
-  /opt/ivy/etcdctl.sh -w table endpoint status
+  #/opt/ivy/etcdctl.sh -w table endpoint status
+  ETCD_LEADERS=()
+  while IFS= read -r line; do
+    leader="$(cut -d ',' -f5 <(echo "${line}"|xargs))"
+    if [[ "${leader}" == 'true' ]]; then
+      endpoint="$(cut -d ',' -f1 <(echo "${line}"))"
+      ETCD_LEADERS+=("${endpoint}")
+    fi
+  done < <(/opt/ivy/etcdctl.sh endpoint status)
+  if [[ ${#ETCD_LEADERS[@]} -ne 1 ]];
+    warn "You have ${#ETCD_LEADERS[@]} leader(s) but you should only have 1"
+    return 1
+  fi
   ask_to_continue "${ASK}"
 
   echo -e "\e[31m ========================= \e[0m"
   echo -e "\e[31m kube-apiserver is running \e[0m"
   echo -e "\e[31m ========================= \e[0m"
-  check_systemctl_status 'kube-apiserver' 'running'
+  check_systemctl_status 'kube-apiserver'
   ask_to_continue "${ASK}"
 
   echo -e "\e[31m ===================================== \e[0m"
   echo -e "\e[31m cloud-lifecycle-controller is running \e[0m"
   echo -e "\e[31m ===================================== \e[0m"
-  check_systemctl_status 'cloud-lifecycle-controller' 'running'
+  check_systemctl_status 'cloud-lifecycle-controller'
   ask_to_continue "${ASK}"
 }
 
 function k8s_checks() {
   local EXPLAIN="${1:-yes}"
   local ASK="${2}"
-  echo -e "\e[31m ============================================== \e[0m"
-  echo -e "\e[31m Confirm controller/agent is recognized as such \e[0m"
-  echo -e "\e[31m ============================================== \e[0m"
-  kubectl --kubeconfig /etc/kubernetes/kubelet/kubeconfig.yaml get nodes
-  ask_to_continue "${ASK}"
+  local NODE_NAME NODE_STATUS
+  echo -e "\e[31m ================================= \e[0m"
+  echo -e "\e[31m Confirm controller/agent is Ready \e[0m"
+  echo -e "\e[31m ================================= \e[0m"
+  if NODE_NAME="$(get_k8s_node_name)"; then
+    echo -e "\e[31m Instance ID $(get_instance_id) is k8s node ${NODE_NAME} \e[0m"
+  else
+    warn "Instance ID $(get_instance_id) is not part of k8s cluster"
+    return 1
+  fi
+  NODE_STATUS="$(get_k8s_node_status)"
+  if [[ "${NODE_STATUS}" != 'Ready' ]]; then
+    warn "k8s node ${NODE_NAME} is NOT ready"
+    return 1
+  fi
 
   echo -e "\e[31m ====================================== \e[0m"
   echo -e "\e[31m Confirm csr(s) are Issued and Approved \e[0m"
@@ -227,20 +281,22 @@ function k8s_checks() {
   echo -e "\e[31m ============================================ \e[0m"
   echo -e "\e[31m Confirm datadog-agent is configured properly \e[0m"
   echo -e "\e[31m ============================================ \e[0m"
-  datadog-agent status
+  timeout 2 datadog-agent status
   ask_to_continue "${ASK}"
 
-  echo -e "\e[31m ===================================================== \e[0m"
-  echo -e "\e[31m Confirm aws-vpc-cni-hairpinning exited without errors \e[0m"
-  echo -e "\e[31m ===================================================== \e[0m"
-  check_systemctl_status 'aws-vpc-cni-hairpinning' 'exited'
-  ask_to_continue "${ASK}"
+  if grep -q 'aws' /etc/cni/net.d/*; then
+    echo -e "\e[31m ===================================================== \e[0m"
+    echo -e "\e[31m Confirm aws-vpc-cni-hairpinning exited without errors \e[0m"
+    echo -e "\e[31m ===================================================== \e[0m"
+    check_systemctl_status 'aws-vpc-cni-hairpinning'
+    ask_to_continue "${ASK}"
 
-  echo -e "\e[31m =============================================================== \e[0m"
-  echo -e "\e[31m Confirm line: 'NXTLYTICS, hairpin all incoming' is listed below \e[0m"
-  echo -e "\e[31m =============================================================== \e[0m"
-  iptables -t mangle --numeric --list --verbose
-  e="See https://en.wikipedia.org/wiki/Hairpinning
+    echo -e "\e[31m =============================================================== \e[0m"
+    echo -e "\e[31m Confirm line: 'NXTLYTICS, hairpin all incoming' is listed below \e[0m"
+    echo -e "\e[31m =============================================================== \e[0m"
+    grep -q 'NXTLYTICS, hairpin all incoming' <(iptables -t mangle --numeric --list --verbose)
+    e="See https://en.wikipedia.org/wiki/Hairpinning
 and https://github.com/aws/amazon-vpc-cni-k8s/blob/master/docs/cni-proposal.md#solution-components"
-  explain "${EXPLAIN}" "${e}"
+    explain "${EXPLAIN}" "${e}"
+  fi
 }
