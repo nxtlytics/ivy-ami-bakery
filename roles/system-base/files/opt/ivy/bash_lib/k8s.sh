@@ -10,7 +10,7 @@
 
 # Prevent direct sourcing of this module
 if [[ -z "${IVY}" ]]; then
-    echo "WARNING: Script '$(basename ${BASH_SOURCE})' was incorrectly sourced. Please do not source it directly."
+    echo "WARNING: Script '$(basename "${0}")' was incorrectly sourced. Please do not source it directly."
     return 255
 fi
 
@@ -30,17 +30,17 @@ function generate_pki() {
   local DNS_SANS="${1}"; shift
   local IP_SANS="${1}"; shift
 
-  local CRT_SERIAL="$(date '+%s')"
-
-  local CSR_OUT="$(mktemp -t csr_out.XXX)"
+  local CRT_SERIAL CSR_OUT CSR_CONFIG
+  CRT_SERIAL="$(date '+%s')"
+  CSR_OUT="$(mktemp -t csr_out.XXX)"
 
   local KEY_OUT="${CONFIG_PATH}/${CERT_NAME}.key"
   local CRT_OUT="${CONFIG_PATH}/${CERT_NAME}.crt"
 
   # make a csr
   if [[ "${USAGE}" = "server" ]]; then
-    local CSR_CONFIG="$(mktemp -t csr_config.XXX)"
-    cat <<EOT > ${CSR_CONFIG}
+    CSR_CONFIG="$(mktemp -t csr_config.XXX)"
+    cat <<EOT > "${CSR_CONFIG}"
 [req]
 distinguished_name = req_distinguished_name
 req_extensions = v3_req
@@ -82,9 +82,9 @@ EOT
       -newkey rsa:2048 \
       -nodes \
       -sha256 \
-      -keyout ${KEY_OUT} \
-      -config ${CSR_CONFIG} \
-      -out ${CSR_OUT}
+      -keyout "${KEY_OUT}" \
+      -config "${CSR_CONFIG}" \
+      -out "${CSR_OUT}"
 
     local EXT="-extfile ${CSR_CONFIG}"
   else
@@ -95,9 +95,9 @@ EOT
       -newkey rsa:2048 \
       -nodes \
       -sha256 \
-      -keyout ${KEY_OUT} \
+      -keyout "${KEY_OUT}" \
       -subj "/O=${GROUP_NAME}/CN=${USER_NAME}" \
-      -out ${CSR_OUT}
+      -out "${CSR_OUT}"
 
     local EXT=""
   fi
@@ -107,15 +107,15 @@ EOT
     -req \
     -days 1825 \
     -sha256 \
-    -CA ${CA_CRT} \
-    -CAkey ${CA_KEY} \
-    -set_serial ${CRT_SERIAL} \
+    -CA "${CA_CRT}" \
+    -CAkey "${CA_KEY}" \
+    -set_serial "${CRT_SERIAL}" \
     -extensions v3_req \
-    ${EXT} \
-    -in ${CSR_OUT} \
-    -out ${CRT_OUT}
+    "${EXT}" \
+    -in "${CSR_OUT}" \
+    -out "${CRT_OUT}"
 
-  rm -f $CSR_CONFIG $CSR_OUT
+  rm -f "${CSR_CONFIG}" "${CSR_OUT}"
 }
 
 function generate_component_kubeconfig() {
@@ -201,7 +201,7 @@ bare-metal. It also includes e2db, an ORM-like abstraction for working with etcd
   #/opt/ivy/etcdctl.sh -w table member list
   ETCD_MEMBERS=()
   mapfile -t ETCD_MEMBERS < <(/opt/ivy/etcdctl.sh member list)
-  if [[ ${#ETCD_MEMBERS[@]} -ne 3 ]];
+  if [[ ${#ETCD_MEMBERS[@]} -ne 3 ]]; then
     warn "You only have ${#ETCD_MEMBERS[@]} etcd members but you should have 3"
     return 1
   fi
@@ -234,7 +234,7 @@ bare-metal. It also includes e2db, an ORM-like abstraction for working with etcd
       ETCD_LEADERS+=("${endpoint}")
     fi
   done < <(/opt/ivy/etcdctl.sh endpoint status)
-  if [[ ${#ETCD_LEADERS[@]} -ne 1 ]];
+  if [[ ${#ETCD_LEADERS[@]} -ne 1 ]]; then
     warn "You have ${#ETCD_LEADERS[@]} leader(s) but you should only have 1"
     return 1
   fi
