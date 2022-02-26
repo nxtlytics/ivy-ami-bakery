@@ -37,6 +37,7 @@ while [[ $# -gt 0 ]]; do
         ;;
       -*)
         echo "Unknown option ${1}"
+        usage
         ;;
   esac
 done
