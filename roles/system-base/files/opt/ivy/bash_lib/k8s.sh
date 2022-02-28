@@ -1,4 +1,4 @@
-#!/bin/echo "This is a library, please source it from another script"
+#!/usr/bin/env bash
 
 ##
 ## k8s.sh
@@ -9,9 +9,9 @@
 
 
 # Prevent direct sourcing of this module
-if [[ -z "${IVY}" ]]; then
-    echo "WARNING: Script '$(basename "${0}")' was incorrectly sourced. Please do not source it directly."
-    return 255
+if [[ ${#BASH_SOURCE[@]} -lt 2 ]]; then
+  echo "WARNING: Script '$(basename "${BASH_SOURCE[0]}")' was incorrectly sourced. Please do not source it directly."
+  return 255
 fi
 
 function generate_pki() {
