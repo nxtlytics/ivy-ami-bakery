@@ -1,4 +1,4 @@
-#!/bin/echo "This is a library, please source it from another script"
+#!/usr/bin/env bash
 
 ##
 ## aws.sh
@@ -9,146 +9,134 @@
 
 
 # Prevent direct sourcing of this module
-if [[ -z "${IVY}" ]]; then
-    echo "WARNING: Script '$(basename ${BASH_SOURCE})' was incorrectly sourced. Please do not source it directly."
-    return 255
+if [[ ${#BASH_SOURCE[@]} -lt 2 ]]; then
+  echo "WARNING: Script '$(basename "${BASH_SOURCE[0]}")' was incorrectly sourced. Please do not source it directly."
+  return 255
 fi
 
 function get_mdsv2() {
-    # Got from https://github.com/aws-quickstart/quickstart-hashicorp-vault/blob/master/scripts/functions.sh#L34-L37
-    local PARAMETER="${1}"
-    local TOKEN="$(curl -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 300" 2>/dev/null)"
-    echo $(curl --retry 3 --silent --fail -H "X-aws-ec2-metadata-token: ${TOKEN}" "http://169.254.169.254/latest/meta-data/${PARAMETER}" 2>/dev/null)
+  # Got from https://github.com/aws-quickstart/quickstart-hashicorp-vault/blob/master/scripts/functions.sh#L34-L37
+  local PARAMETER="${1}"
+  local TOKEN
+  TOKEN="$(curl -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 300" 2>/dev/null)"
+  curl --retry 3 --silent --fail -H "X-aws-ec2-metadata-token: ${TOKEN}" \
+    "http://169.254.169.254/latest/meta-data/${PARAMETER}" 2>/dev/null
 }
 
 function get_instance_id() {
-    echo $(curl --retry 3 --silent --fail http://169.254.169.254/latest/meta-data/instance-id)
+  curl --retry 3 --silent --fail \
+    'http://169.254.169.254/latest/meta-data/instance-id'
 }
 
 function get_instance_type() {
-    echo $(curl --retry 3 --silent --fail http://169.254.169.254/latest/meta-data/instance-type)
+  curl --retry 3 --silent --fail \
+    'http://169.254.169.254/latest/meta-data/instance-type'
 }
 
 function get_provider_id() {
-    echo "aws:///$(get_availability_zone)/$(get_instance_id)"
+  echo "aws:///$(get_availability_zone)/$(get_instance_id)"
 }
 
 function get_availability_zone() {
-    echo $(curl --retry 3 --silent --fail http://169.254.169.254/latest/meta-data/placement/availability-zone)
+  curl --retry 3 --silent --fail \
+    http://169.254.169.254/latest/meta-data/placement/availability-zone
 }
 
 function get_region() {
-    local availability_zone=$(get_availability_zone)
-    echo ${availability_zone%?}
+  local availability_zone
+  availability_zone=$(get_availability_zone)
+  echo "${availability_zone%?}"
 }
 
 function get_sysenv() {
-    local REGION=$(get_region)
-    local INSTANCE_ID=$(get_instance_id)
-
-    echo $(aws ec2 describe-instances --region ${REGION} \
-                                      --instance-id ${INSTANCE_ID} \
-                                      --query "Reservations[0].Instances[0].Tags[?Key==\`$(get_ivy_tag):sysenv\`].Value" \
-                                      --output text)
+  aws ec2 describe-instances --region "$(get_region)" \
+                             --instance-id "$(get_instance_id)" \
+                             --query "Reservations[0].Instances[0].Tags[?Key==\`$(get_ivy_tag):sysenv\`].Value" \
+                             --output text
 }
 
 function get_service() {
-    local REGION=$(get_region)
-    local INSTANCE_ID=$(get_instance_id)
-
-    echo $(aws ec2 describe-instances --region ${REGION} \
-                                      --instance-id ${INSTANCE_ID} \
-                                      --query "Reservations[0].Instances[0].Tags[?Key==\`$(get_ivy_tag):service\`].Value" \
-                                      --output text)
+  aws ec2 describe-instances --region "$(get_region)" \
+                             --instance-id "$(get_instance_id)" \
+                             --query "Reservations[0].Instances[0].Tags[?Key==\`$(get_ivy_tag):service\`].Value" \
+                             --output text
 }
 
 function get_role() {
-    local REGION=$(get_region)
-    local INSTANCE_ID=$(get_instance_id)
-
-    echo $(aws ec2 describe-instances --region ${REGION} \
-                                      --instance-id ${INSTANCE_ID} \
-                                      --query "Reservations[0].Instances[0].Tags[?Key==\`$(get_ivy_tag):role\`].Value" \
-                                      --output text)
+  aws ec2 describe-instances --region "$(get_region)" \
+                             --instance-id "$(get_instance_id)" \
+                             --query "Reservations[0].Instances[0].Tags[?Key==\`$(get_ivy_tag):role\`].Value" \
+                             --output text
 }
 
 function get_group() {
-    local REGION=$(get_region)
-    local INSTANCE_ID=$(get_instance_id)
-
-    echo $(aws ec2 describe-instances --region ${REGION} \
-                                      --instance-id ${INSTANCE_ID} \
-                                      --query "Reservations[0].Instances[0].Tags[?Key==\`$(get_ivy_tag):group\`].Value" \
-                                      --output text)
+  aws ec2 describe-instances --region "$(get_region)" \
+                             --instance-id "$(get_instance_id)" \
+                             --query "Reservations[0].Instances[0].Tags[?Key==\`$(get_ivy_tag):group\`].Value" \
+                             --output text
 }
 
 function get_tags() {
-    local SEPARATOR="${1:- }"
-    local REGION=$(get_region)
-    local INSTANCE_ID=$(get_instance_id)
-    echo $(aws ec2 describe-tags --region ${REGION} \
-                                 --filters "Name=resource-id,Values=${INSTANCE_ID}" \
-                                 --query 'Tags[*].[@.Key, @.Value]' \
-                                 --output text | sed -e 's/\s\+/:/g' | tr '\n' "${SEPARATOR}")
+  local SEPARATOR="${1:- }"
+  aws ec2 describe-tags --region "$(get_region)" \
+                        --filters "Name=resource-id,Values=$(get_instance_id)" \
+                        --query 'Tags[*].[@.Key, @.Value]' \
+                        --output json | jq -r '.[] | join(":")' | tr '\n' "${SEPARATOR}"
 }
 
 function get_eni_id() {
-    local ENI_ROLE=$1
-    local SERVICE=$2
-
-    local REGION=$(get_region)
-    local SYSENV=$(get_sysenv)
-    local TAG=$(get_ivy_tag)
-    echo $(aws ec2 describe-network-interfaces --region ${REGION} \
-           --filters Name=tag:"${TAG}:sysenv",Values="${SYSENV}" \
-                     Name=tag:"${TAG}:role",Values="${ENI_ROLE}" \
-                     Name=tag:"${TAG}:service",Values="${SERVICE}" \
-           --query 'NetworkInterfaces[0].NetworkInterfaceId' \
-           --output text)
+  local ENI_ROLE="${1}"
+  local SERVICE="${2}"
+  local TAG
+  TAG=$(get_ivy_tag)
+  aws ec2 describe-network-interfaces --region "$(get_region)" \
+                                      --filters Name=tag:"${TAG}:sysenv",Values="$(get_sysenv)" \
+                                                Name=tag:"${TAG}:role",Values="${ENI_ROLE}" \
+                                                Name=tag:"${TAG}:service",Values="${SERVICE}" \
+                                      --query 'NetworkInterfaces[0].NetworkInterfaceId' \
+                                      --output text
 }
 
 function get_eni_ip() {
-    local ENI_ID=$1
-
-    local REGION=$(get_region)
-    echo $(aws ec2 describe-network-interfaces --region ${REGION} \
-           --network-interface-ids ${ENI_ID} \
-           --query 'NetworkInterfaces[0].PrivateIpAddress' \
-           --output text)
+  local ENI_ID="${1}"
+  aws ec2 describe-network-interfaces --region "$(get_region)" \
+                                      --network-interface-ids "${ENI_ID}" \
+                                      --query 'NetworkInterfaces[0].PrivateIpAddress' \
+                                      --output text
 }
 
 function get_eni_public_ip() {
-    local ENI_ID=$1
-
-    local REGION=$(get_region)
-    echo $(aws ec2 describe-network-interfaces --region ${REGION} \
-           --network-interface-ids ${ENI_ID} \
-           --query 'NetworkInterfaces[0].Association.PublicIp' \
-           --output text)
+  local ENI_ID="${1}"
+  aws ec2 describe-network-interfaces --region "$(get_region)" \
+                                      --network-interface-ids "${ENI_ID}" \
+                                      --query 'NetworkInterfaces[0].Association.PublicIp' \
+                                      --output text
 }
 
 function get_eni_private_dns_name() {
-    local ENI_ID=$1
-
-    local REGION=$(get_region)
-    echo $(aws ec2 describe-network-interfaces --region ${REGION} \
-           --network-interface-ids ${ENI_ID} \
-           --query 'NetworkInterfaces[0].PrivateDnsName' \
-           --output text)
+  local ENI_ID="${1}"
+  aws ec2 describe-network-interfaces --region "$(get_region)" \
+                                      --network-interface-ids "${ENI_ID}" \
+                                      --query 'NetworkInterfaces[0].PrivateDnsName' \
+                                      --output text
 }
 
 function get_eni_interface() {
     local ENI_ID="${1}"
-    local REGION="$(get_region)"
-    local ENI_FILE=$(mktemp -t -u "ENI.XXXX.json")
-    echo "$(aws ec2 describe-network-interfaces --region ${REGION} --network-interface-ids ${ENI_ID} --query 'NetworkInterfaces[0]' --output json)" &> "${ENI_FILE}"
-    local ENI_STATUS="$(jq -r '.Status' ${ENI_FILE})"
+    local ENI_FILE ENI_STATUS MAC_ADDRESS
+    ENI_FILE="$(mktemp -t -u 'ENI.XXXX.json')"
+    aws ec2 describe-network-interfaces --region "$(get_region)" \
+                                        --network-interface-ids "${ENI_ID}" \
+                                        --query 'NetworkInterfaces[0]' \
+                                        --output json &> "${ENI_FILE}"
+    ENI_STATUS="$(jq -r '.Status' "${ENI_FILE}")"
     if [[ "${ENI_STATUS}" != 'in-use' ]]; then
+      rm -f "${ENI_FILE}"
       return 1
     fi
-    local MAC_ADDRESS="$(jq -r '.MacAddress' ${ENI_FILE})"
+    MAC_ADDRESS="$(jq -r '.MacAddress' "${ENI_FILE}")"
     rm -f "${ENI_FILE}"
-    echo "$(ip -o link | awk '$2 != "lo:" {print $2, $(NF-2)}' | grep -m 1 "${MAC_ADDRESS}" | cut -d ':' -f1)"
+    ip -o link | awk '$2 != "lo:" {print $2, $(NF-2)}' | grep -m 1 "${MAC_ADDRESS}" | cut -d ':' -f1
 }
 
 function attach_eni() {
@@ -313,14 +301,18 @@ EOF
 }
 
 function get_ssm_param() {
-    local PARAMETER_NAME="${1}"
-    local REGION="${3:-$(get_region)}"
-    aws ssm get-parameter --region "${REGION}" --name "${PARAMETER_NAME}" --with-decryption --output text --query 'Parameter.Value'
+  local PARAMETER_NAME="${1}"
+  local REGION="${3:-$(get_region)}"
+  aws ssm get-parameter --region "${REGION}" \
+                        --name "${PARAMETER_NAME}" \
+                        --with-decryption \
+                        --output text \
+                        --query 'Parameter.Value'
 }
 
 function get_secret() {
-    local SECRET_ID="${1}"
-    local REGION="${2:-$(get_region)}"
-    local VALUE=$(aws secretsmanager --region "${REGION}" get-secret-value --secret-id "${SECRET_ID}" | jq --raw-output .SecretString)
-    echo ${VALUE}
+  local SECRET_ID="${1}"
+  local REGION="${2:-$(get_region)}"
+  local VALUE=$(aws secretsmanager --region "${REGION}" get-secret-value --secret-id "${SECRET_ID}" | jq --raw-output .SecretString)
+  echo ${VALUE}
 }

@@ -3,12 +3,12 @@ set -euo pipefail
 IFS=$'\n\t'
 
 # Ensure dependencies are present
-if [[ ! -x $(command -v git) || ! -x $(command -v docker) ]]; then
+if ! command -v git &> /dev/null || ! command -v docker &> /dev/null; then
     echo "[-] Dependencies unmet.  Please verify that the following are installed and in the PATH:  git, docker" >&2
     exit 1
 fi
 
-GITROOT=$(git rev-parse --show-toplevel)
+GITROOT="$(git rev-parse --show-toplevel)"
 SYSTEM_BASE_FILES="${GITROOT}/roles/system-base/files/usr/local/bin"
 declare -A BINARIES
 
@@ -34,12 +34,12 @@ function download_if_not_present() {
     case ${BINARY} in
 
       gostatsd)
-        docker run --rm -v ${SYSTEM_BASE_FILES}:/output -e BINARY=${BINARY} \
+        docker run --rm -v "${SYSTEM_BASE_FILES}":/output -e BINARY="${BINARY}" \
             --entrypoint /bin/ash "${DOCKER_IMAGE}" -c 'cp $(which ${BINARY}) /output'
         ;;
 
       bpftrace)
-        docker run --rm -v ${SYSTEM_BASE_FILES}:/output -e BINARY=${BINARY} \
+        docker run --rm -v "${SYSTEM_BASE_FILES}":/output -e BINARY="${BINARY}" \
             "${DOCKER_IMAGE}" /bin/bash -c "cp /usr/bin/bpftrace /output"
         ;;
 
