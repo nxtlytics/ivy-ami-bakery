@@ -10,7 +10,7 @@
 #  http://engineeringblog.yelp.com/2015/04/true-zero-downtime-haproxy-reloads.html
 #
 function get_drop_status() {
-    echo "$(iptables -L INPUT | egrep '^DROP.*multiport dports http,(http-alt|webcache).*$')"
+    grep -E '^DROP.*multiport dports http,(http-alt|webcache).*$' <(iptables -L INPUT)
 }
 
 function disable_http() {
@@ -21,7 +21,7 @@ function disable_http() {
 }
 
 function reload_haproxy() {
-    echo "`date +%Y%m%d-%H:%M:%S.%N` PID: $$ - Reloading haproxy..."
+    echo "$(date +%Y%m%d-%H:%M:%S.%N) PID: $$ - Reloading haproxy..."
     service haproxy reload
 }
 

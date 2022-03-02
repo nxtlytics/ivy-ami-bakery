@@ -168,7 +168,7 @@
     src: etc/kubernetes/kubelet/config.yaml
     dest: /etc/kubernetes/kubelet/config.yaml
 
-- name: copy kubelet-provider-id script 
+- name: copy kubelet-provider-id script
   copy:
     src: opt/ivy/kubelet-provider-id.sh
     dest: /opt/ivy/kubelet-provider-id.sh
@@ -213,4 +213,3 @@
 # TODO: install traefik ingresscontroller locally
 # TODO: install coredns locally
 # TODO: install cilium locally
-

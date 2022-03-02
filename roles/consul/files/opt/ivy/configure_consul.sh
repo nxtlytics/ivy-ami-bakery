@@ -1,22 +1,23 @@
 #!/bin/bash
+# shellcheck disable=SC1091
 source /opt/ivy/bash_functions.sh
 
-IS_MASTER=$1
-NODE_NAME=$2
+IS_MASTER="${1}"
+NODE_NAME="${2}"
 
-CONFIGFILE="/etc/sysconfig/consul"
-SYSENV=$(get_sysenv)
-TAG=$(get_ivy_tag)
+CONFIGFILE='/etc/sysconfig/consul'
+SYSENV="$(get_sysenv)"
+TAG="$(get_ivy_tag)"
 
 sed -i -e '/^#.*__IVY_TAG__/s/^#//' -e "s/__IVY_TAG__/${TAG}/" /etc/dnsmasq.d/10-dnsmasq
 
-CONSUL_MASTERS=""
-if [[ $(get_cloud) -eq "aws" ]]; then
-   MESOS_IPS=($(aws ec2 describe-network-interfaces --region $(get_region) \
-                   --filters Name=tag:"${TAG}:sysenv",Values="${SYSENV}"    \
-                             Name=tag:"${TAG}:service",Values="Mesos"                 \
-                   --query 'NetworkInterfaces[*].PrivateIpAddress'                \
-                   --output text))
+CONSUL_MASTERS=''
+if [[ $(get_cloud) == 'aws' ]]; then
+   mapfile -t MESOS_IPS < <(aws ec2 describe-network-interfaces --region "$(get_region)" \
+                   --filters "Name=tag:${TAG}:sysenv,Values=${SYSENV}"    \
+                             "Name=tag:${TAG}:service,Values=Mesos"       \
+                   --query 'NetworkInterfaces[*].PrivateIpAddress'        \
+                   --output text)
 
     for IP in "${MESOS_IPS[@]}"; do
       CONSUL_MASTERS="${CONSUL_MASTERS} -retry-join=${IP}"
@@ -28,13 +29,13 @@ if [[ $(get_cloud) -eq "aws" ]]; then
 fi
 
 # nuke existing config file
-echo "" > ${CONFIGFILE}
+echo "" > "${CONFIGFILE}"
 
-CLIENT="0.0.0.0"
+CLIENT='0.0.0.0'
 
-if [ "${IS_MASTER}" = "master" ]; then
+if [[ "${IS_MASTER}" == 'master' ]]; then
     echo "Configuring as master..."
-    echo 'SERVER_FLAGS="-server -bootstrap-expect=3 -ui"' >> ${CONFIGFILE}
+    echo 'SERVER_FLAGS="-server -bootstrap-expect=3 -ui"' >> "${CONFIGFILE}"
 fi
 
 #...
@@ -56,7 +57,7 @@ CONSUL_MASTERS="${CONSUL_MASTERS}"
 CONSUL_FLAGS="-datacenter=${SYSENV} -domain=${TAG}. -client=${CLIENT} -advertise='{{ GetDefaultInterfaces | limit 1 | attr \"address\" }}' -bind=0.0.0.0 -config-dir=/etc/consul.d -data-dir=/opt/consul/data"
 EOF
 
-if [ ! -z "${NODE_NAME}" ]; then
+if [ -n "${NODE_NAME}" ]; then
     echo "Setting node name"
     echo "NODE_NAME=\"-node ${NODE_NAME}\"" >> ${CONFIGFILE}
 fi
@@ -70,4 +71,3 @@ systemctl enable consul
 
 echo "Starting consul"
 systemctl start consul
-
