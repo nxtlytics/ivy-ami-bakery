@@ -2,27 +2,33 @@
 
 Bakes tasty AMIs, just for you!
 
-`Packer + Ansible = <3` 
+`Packer + Ansible = <3`
 
-# How to create an Ivy environment
+## How to create an Ivy environment
 
-Go [here](https://github.com/nxtlytics/ivy-documentation/blob/master/howto/Processes/Creating_new_AWS_GovCloud_accounts.md#setup-ivy-environment-works-on-commercial-and-govcloud-aws)
+Go
+[here](https://github.com/nxtlytics/ivy-documentation/blob/master/howto/Processes/Creating_new_AWS_GovCloud_accounts.md#setup-ivy-environment-works-on-commercial-and-govcloud-aws)
 
 ## Structure
 
-- `providers` - cloud providers and their image sets  
-  - `images` - sets of Ansible roles that can be ran against an instance to create a machine image for the given provider  
-    An `image` will translate into an `ami` or the provider-specific version of a machine image.
-  
-- `roles` - ansible roles applied against a given image  
+- `providers` - cloud providers and their image sets
+  - `images` - sets of Ansible roles that can be ran against an instance to
+    create a machine image for the given provider
+    An `image` will translate into an `ami` or the provider-specific version of
+    a machine image.
+
+- `roles` - ansible roles applied against a given image
   Plain Jane Ansible roles.
 
 ## How do I use this?
 
 This requires:
+
 - packer
 - docker (on the host)
 - IAM role
+
+<!-- markdownlint-disable MD013 -->
 
 ```shell
 Bake AMI from Ansible roles using Packer
@@ -38,9 +44,14 @@ Bake AMI from Ansible roles using Packer
    -d    enable debug mode
 ```
 
+<!-- markdownlint-enable MD013 -->
+
 Examples:
 
 ```shell
-AWS_PROFILE=your-profile ./build.sh -p amazon -i ivy-base -v 'datadog_api_key=your-datadog-api-key'
-AWS_PROFILE=your-profile ./build.sh -p amazon -i ivy-mesos
+$ AWS_PROFILE=your-profile ./build.sh \
+    -p amazon -i ivy-base \
+    -v 'datadog_api_key=your-datadog-api-key'
+$ AWS_PROFILE=your-profile ./build.sh \
+    -p amazon -i ivy-mesos
 ```

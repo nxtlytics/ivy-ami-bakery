@@ -1,12 +1,13 @@
 #!/bin/bash
 
+# shellcheck disable=SC1091
 source /opt/ivy/bash_functions.sh
 set -e
 set -o pipefail
 
 if [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
   cat <<EOT
-Usage: $(basename $0) PATH
+Usage: $(basename "${0}") PATH
 
 Write DEFAULT_NODE_LABELS to a file as specified by PATH in the format like:
   DEFAULT_NODE_LABELS='beta.kubernetes.io/instance-type=m4.xlarge,ivy/service=eks-agents'
@@ -57,7 +58,7 @@ done
 
 # Write out our node labels to a file
 NODE_LABEL_STR=$(IFS=,; echo "${NODE_LABELS[*]}")
-cat <<EOT > ${OUT_FILE}
+cat <<EOT > "${OUT_FILE}"
 # Default node labels added by /opt/ivy/kubelet-default-labels.sh
 DEFAULT_NODE_LABELS='${NODE_LABEL_STR}'
 EOT

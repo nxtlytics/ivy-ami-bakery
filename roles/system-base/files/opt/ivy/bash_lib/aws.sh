@@ -198,7 +198,7 @@ function attach_eni() {
   ifdown "${OLD_INTERFACE}"
   sed -e "s/${OLD_INTERFACE}/${NEW_INTERFACE}/g" "/etc/sysconfig/network-scripts/route-${OLD_INTERFACE}" >> "/etc/sysconfig/network-scripts/route-${NEW_INTERFACE}"
   echo > "/etc/sysconfig/network-scripts/route-${OLD_INTERFACE}"
-  service network restart
+  systemctl restart network
 }
 
 function attach_ebs() {

@@ -20,4 +20,3 @@ template {
   destination = "/etc/haproxy/haproxy.cfg"
   command = "/opt/ivy/consul-template/reload_haproxy.sh"
 }
-

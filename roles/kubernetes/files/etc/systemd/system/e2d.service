@@ -22,4 +22,3 @@ ExecStart=/usr/bin/e2d run \
     --ca-cert $ETCD_CA \
     --ca-key $ETCD_CA_KEY \
     --data-dir $E2D_DATA_DIR
-
