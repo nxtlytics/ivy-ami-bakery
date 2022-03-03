@@ -174,9 +174,29 @@ function get_k8s_node_status() {
 function check_systemctl_status() {
   local UNIT="${1}"
   if ! grep -q 'active' <(systemctl is-active "${UNIT}"); then
-    echo "${UNIT} status is NOT: active"
+    warn "${UNIT} status is NOT: active"
     return 1
   fi
+}
+
+function check_dd_features() {
+  local FEATURES_AS_STRING="${1}"
+  declare -a FEATURES
+  # TODO: Make these toggleable
+  FEATURES=(
+    'feature_apm_enabled: true'
+    'feature_cspm_enabled: false'
+    'feature_cws_enabled: false'
+    'feature_logs_enabled: true'
+    'feature_networks_enabled: true'
+    'feature_process_enabled: false'
+  )
+  for feature in "${FEATURES[@]}"; do
+    if ! grep -q "${feature}" <<<"${FEATURES_AS_STRING}"; then
+      warn "feature is not configured properly, should be ${feature}"
+      return 1
+    fi
+  done
 }
 
 function k8s_controller_checks() {
@@ -246,6 +266,18 @@ bare-metal. It also includes e2db, an ORM-like abstraction for working with etcd
   check_systemctl_status 'kube-apiserver'
   ask_to_continue "${ASK}"
 
+  echo -e "\e[31m ========================= \e[0m"
+  echo -e "\e[31m kube-scheduler is running \e[0m"
+  echo -e "\e[31m ========================= \e[0m"
+  check_systemctl_status 'kube-scheduler'
+  ask_to_continue "${ASK}"
+
+  echo -e "\e[31m ================================== \e[0m"
+  echo -e "\e[31m kube-controller-manager is running \e[0m"
+  echo -e "\e[31m ================================== \e[0m"
+  check_systemctl_status 'kube-controller-manager'
+  ask_to_continue "${ASK}"
+
   echo -e "\e[31m ===================================== \e[0m"
   echo -e "\e[31m cloud-lifecycle-controller is running \e[0m"
   echo -e "\e[31m ===================================== \e[0m"
@@ -256,7 +288,7 @@ bare-metal. It also includes e2db, an ORM-like abstraction for working with etcd
 function k8s_checks() {
   local EXPLAIN="${1:-yes}"
   local ASK="${2}"
-  local NODE_NAME NODE_STATUS
+  local NODE_NAME NODE_STATUS DD_STATUS DD_FEATURES DD_FAILED_CHECKS
   echo -e "\e[31m ================================= \e[0m"
   echo -e "\e[31m Confirm controller/agent is Ready \e[0m"
   echo -e "\e[31m ================================= \e[0m"
@@ -272,16 +304,26 @@ function k8s_checks() {
     return 1
   fi
 
-  echo -e "\e[31m ====================================== \e[0m"
-  echo -e "\e[31m Confirm csr(s) are Issued and Approved \e[0m"
-  echo -e "\e[31m ====================================== \e[0m"
-  kubectl --kubeconfig /etc/kubernetes/kubelet/kubeconfig.yaml get csr
-  ask_to_continue "${ASK}"
-
   echo -e "\e[31m ============================================ \e[0m"
   echo -e "\e[31m Confirm datadog-agent is configured properly \e[0m"
   echo -e "\e[31m ============================================ \e[0m"
-  timeout 2 datadog-agent status
+  check_systemctl_status 'datadog-agent'
+  if ! timeout 2 datadog-agent status &> /dev/null; then
+    warn "datadog-agent has not finished gathering info for the first time"
+    return 1
+  fi
+  if ! grep -q 'Agent health: PASS' <(datadog-agent health); then
+    warn 'datadog-agent is NOT healthy'
+    return 1
+  fi
+  DD_STATUS="$(datadog-agent status)"
+  DD_FEATURES="$(grep 'feature_' <<<"${DD_STATUS}")"
+  check_dd_features "${DD_FEATURES}"
+  DD_FAILED_CHECKS="$(grep -A2 'Failed checks' <<<"${DD_STATUS}")"
+  if ! grep -q 'no checks' <<<"${DD_FAILED_CHECKS}"; then
+    warn 'There are datadog checks that failed'
+    return 1
+  fi
   ask_to_continue "${ASK}"
 
   if grep -q 'aws' /etc/cni/net.d/*; then
