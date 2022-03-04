@@ -10,7 +10,7 @@
 #  http://engineeringblog.yelp.com/2015/04/true-zero-downtime-haproxy-reloads.html
 #
 function get_drop_status() {
-    grep -E '^DROP.*multiport dports http,(http-alt|webcache).*$' <(iptables -L INPUT)
+    iptables -L INPUT | grep -E '^DROP.*multiport dports http,(http-alt|webcache).*$'
 }
 
 function disable_http() {

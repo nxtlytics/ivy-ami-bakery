@@ -125,7 +125,7 @@ function run_packer() {
     bash ./scripts/binaries/download_binaries.sh
     # This is needed when using RedHat based distros
     # More info at https://www.packer.io/intro/getting-started/install.html#troubleshooting
-    mapfile -t PACKER_BINS < <(awk '{ print $3 }' <(type -a packer))
+    mapfile -t PACKER_BINS < <(type -a packer | awk '{ print $3 }')
     echo "These are the packer bins available in your PATH: ${PACKER_BINS[*]}"
     for bin in "${PACKER_BINS[@]}"; do
       if ${bin} -h 2>&1 | grep 'build image' > /dev/null; then
