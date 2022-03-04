@@ -185,11 +185,8 @@ function check_dd_features() {
   # TODO: Make these toggleable
   FEATURES=(
     'feature_apm_enabled: true'
-    'feature_cspm_enabled: false'
-    'feature_cws_enabled: false'
     'feature_logs_enabled: true'
     'feature_networks_enabled: true'
-    'feature_process_enabled: false'
   )
   for feature in "${FEATURES[@]}"; do
     if ! grep -q "${feature}" <<<"${FEATURES_AS_STRING}"; then
