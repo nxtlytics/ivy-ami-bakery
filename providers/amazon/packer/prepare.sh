@@ -1,4 +1,5 @@
-#!/bin/bash -x
+#!/usr/bin/env bash
+set -x
 
 # Allow notty sudo
 sed -n -e '/Defaults.*requiretty/s/^/#/p' /etc/sudoers

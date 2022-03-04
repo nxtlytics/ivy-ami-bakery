@@ -228,7 +228,7 @@ function ask_to_continue(){
   local ASK="${1:-yes}"
   if [[ "${ASK}" == 'yes' ]]; then
     echo -e "\e[31m press [enter] to continue \e[0m"
-    read -p ""
+    read -r -p ""
   fi
 }
 
