@@ -5,6 +5,7 @@
   connection: local
   roles:
     - system-base
+    - dnsmasq
     - docker
     - kubernetes
   vars:
