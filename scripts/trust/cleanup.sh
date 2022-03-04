@@ -94,7 +94,7 @@ aws iam delete-policy \
   --profile "${CHILD_ACCOUNT_PROFILE}"
 
 echo "Looking up for all instances with instance profile ${CHILD_ACCOUNT_ROLE}"
-if grep -q "${CHILD_ACCOUNT_ROLE}" <(aws ec2 describe-iam-instance-profile-associations --profile "${CHILD_ACCOUNT_PROFILE}" --output text); then
+if aws ec2 describe-iam-instance-profile-associations --profile "${CHILD_ACCOUNT_PROFILE}" --output text | grep -q "${CHILD_ACCOUNT_ROLE}"; then
   declare -a ASSOCIATED_ROLES
   mapfile -t ASSOCIATED_ROLES < <(aws ec2 describe-iam-instance-profile-associations --query 'IamInstanceProfileAssociations[*].{AssociationId: AssociationId, Arn: IamInstanceProfile.Arn}' --profile "${CHILD_ACCOUNT_PROFILE}" --output text | grep "${CHILD_ACCOUNT_ROLE}" | awk '{ print $2 }')
 
