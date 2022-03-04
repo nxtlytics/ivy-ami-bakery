@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 IFS=$'\n\t'
+# shellcheck disable=SC1091
 . /opt/ivy/bash_functions.sh
 
 THIS_SCRIPT=$(basename "${0}")
