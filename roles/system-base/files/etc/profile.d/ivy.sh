@@ -43,5 +43,6 @@ if [[ "$PS1" ]]; then
         # bold green default
         COLOR_CODE="\e[1;32m"
     fi
+    # shellcheck disable=SC2155
     export PS1="[\u@\[${COLOR_CODE}\]$(hostname -f)\[\e[0m\] \W]\$ "
 fi
