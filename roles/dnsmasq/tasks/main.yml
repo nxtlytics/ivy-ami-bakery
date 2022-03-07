@@ -38,7 +38,7 @@
     dest: /etc/dnsmasq.d/10-dnsmasq
 
 - name: consul setup file
-  copy: 
+  copy:
     src: opt/ivy/set-dnsmasq-dhcp.sh
     dest: /opt/ivy/set-dnsmasq-dhcp.sh
     mode: 0755
