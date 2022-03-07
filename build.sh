@@ -229,6 +229,6 @@ validate_provider "${provider}"
 validate_image "${provider}" "${image}"
 
 # do it nao
-setup_env ${provider} ${image} ${regions:-""} ${multiaccountprofile:-""} ${enableazurecompat:-"true"}
-arguments=$(get_packer_vars ${vars:-""})
+setup_env "${provider}" "${image}" "${regions:-""}" "${multiaccountprofile:-""}" "${enableazurecompat:-"true"}"
+arguments=$(get_packer_vars "${vars:-""}")
 run_packer "${arguments:-""}"

@@ -1,6 +1,6 @@
-#!/bin/bash -x
+#!/usr/bin/env bash
 
-set -eu -o pipefail
+set -eux -o pipefail
 
 bold=$(tput bold)
 norm=$(tput sgr0)
@@ -9,7 +9,7 @@ function show_help() {
     cat <<EOT
 Copy an Amazon AMI to an Azure storage account and create a shared image
 
- Usage: $(basename $0) -a AMI_ID -b BUCKET_NAME -r IAM_ROLE -s STORAGE_ACCOUNT -c STORAGE_ACCOUNT_CONTAINER -g RESOURCE_GROUP -i IMAGE_GALLERY_NAME -n IMAGE_NAME -v IMAGE_VERSION
+ Usage: $(basename "${0}") -a AMI_ID -b BUCKET_NAME -r IAM_ROLE -s STORAGE_ACCOUNT -c STORAGE_ACCOUNT_CONTAINER -g RESOURCE_GROUP -i IMAGE_GALLERY_NAME -n IMAGE_NAME -v IMAGE_VERSION
 
  Options:
    -a    Source AMI ID
