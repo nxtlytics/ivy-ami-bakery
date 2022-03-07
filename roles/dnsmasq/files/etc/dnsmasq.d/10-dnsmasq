@@ -1,0 +1,11 @@
+# Performance tweaks
+domain-needed
+bogus-priv
+dns-forward-max=2000
+cache-size=1000
+
+# use AWS servers for recursive lookups
+server=/#/%%DHCP_DNS%%
+
+# Use coredns for tag_namespace lookups
+#server=/%%TAG_NAMESPACE%%./%%COREDNS%%

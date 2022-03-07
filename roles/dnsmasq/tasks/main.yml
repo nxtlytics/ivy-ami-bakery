@@ -1,0 +1,49 @@
+---
+# dnsmasq is used for providing split dns lookup services to bypass consul for internet dns queries.
+# socat is used for forwarding docker0 requests to consul to localhost for security,
+# since iptables forwarding to localhost is not well-supported especially in docker containers.
+- name: install packages
+  # Install latest packages
+  # noqa 403
+  yum:
+    name:
+      - dnsmasq
+      - socat
+    state: latest
+
+- name: enable dnsmasq
+  systemd:
+    name: "dnsmasq"
+    enabled: true
+
+- name: ensure local dnsmasq is used as a DNS server
+  lineinfile:
+    dest: "{{ item }}"
+    line: "prepend domain-name-servers 127.0.0.1;"
+  with_first_found:
+    - files:
+      - "/etc/dhcp/dhclient.conf"
+      - "/etc/dhclient.conf"
+      skip: True  # skippable if not using dhcp
+
+- name: patch dnsmasq.conf to include /etc/dnsmasq.d
+  replace:
+    dest: /etc/dnsmasq.conf
+    regexp: '^#conf-dir=/etc/dnsmasq.d$'
+    replace: 'conf-dir=/etc/dnsmasq.d'
+
+- name: configure dnsmasq
+  copy:
+    src: etc/dnsmasq.d/10-dnsmasq
+    dest: /etc/dnsmasq.d/10-dnsmasq
+
+- name: consul setup file
+  copy:
+    src: opt/ivy/set-dnsmasq-dhcp.sh
+    dest: /opt/ivy/set-dnsmasq-dhcp.sh
+    mode: 0755
+
+- name: copy init files
+  copy:
+    src: etc/systemd/system/
+    dest: /etc/systemd/system/
