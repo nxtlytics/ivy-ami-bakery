@@ -3,11 +3,14 @@
   hosts: 127.0.0.1
   user: ec2-user
   connection: local
-  roles:
-    - system-base
-    - dnsmasq
-    - docker
-    - kubernetes
   vars:
     # this builds a 1.21.x compatible cluster AMI
     k8s_version: "1.21.8"
+    enable_azure_compat: true
+  roles:
+    - system-base
+    - dnsmasq
+    - role: azure-compat
+      when: enable_azure_compat == "true"
+    - docker
+    - kubernetes
