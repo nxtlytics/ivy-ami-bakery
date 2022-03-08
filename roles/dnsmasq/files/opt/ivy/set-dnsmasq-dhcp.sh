@@ -34,11 +34,14 @@ done
 function update_dnsmasq_conf() {
   local OLD_STRING="${1}"
   local NEW_STRING="${2}"
-  local QUERY="${OLD_STRING}/${NEW_STRING}"
+  local QUERY="s/${OLD_STRING}/${NEW_STRING}/"
   sed -i "${QUERY}" /etc/dnsmasq.d/10-dnsmasq
 }
 
-DNS="$(grep 'domain-name-servers' "/var/lib/dhclient/dhclient--$(get_primary_interface).leases" | head -1)"
+DNS="$(grep 'domain-name-servers' \
+        "/var/lib/dhclient/dhclient--$(get_default_interface).lease" \
+          | head -1 \
+          | awk '{len=split($3,a,","); gsub(";","",a[len]); print a[len];}')"
 
 update_dnsmasq_conf '%%DHCP_DNS%%' "${DNS}"
 
