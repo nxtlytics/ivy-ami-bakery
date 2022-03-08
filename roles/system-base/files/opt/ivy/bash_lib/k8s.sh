@@ -30,11 +30,9 @@ function generate_pki() {
   local DNS_SANS="${1}"; shift
   local IP_SANS="${1}"; shift
 
-  local CRT_SERIAL CSR_OUT CSR_CONFIG
+  local CRT_SERIAL CSR_OUT CSR_CONFIG EXT
   CRT_SERIAL="$(date '+%s')"
   CSR_OUT="$(mktemp -t csr_out.XXX)"
-  declare -a OPENSSL_ARGS
-  OPENSSL_ARGS=()
 
 
   local KEY_OUT="${CONFIG_PATH}/${CERT_NAME}.key"
@@ -89,8 +87,7 @@ EOT
       -config "${CSR_CONFIG}" \
       -out "${CSR_OUT}"
 
-    OPENSSL_ARGS+=('-extfile')
-    OPENSSL_ARGS+=("${CSR_CONFIG}")
+    EXT="-extfile ${CSR_CONFIG}"
   else
     # create csr using inline subject
     openssl req \
@@ -105,6 +102,7 @@ EOT
   fi
 
   # issue it against the CA for 5 years validity
+  # shellcheck disable=SC2086
   openssl x509 \
     -req \
     -days 1825 \
@@ -113,7 +111,7 @@ EOT
     -CAkey "${CA_KEY}" \
     -set_serial "${CRT_SERIAL}" \
     -extensions v3_req \
-    "${OPENSSL_ARGS[@]}" \
+    ${EXT} \
     -in "${CSR_OUT}" \
     -out "${CRT_OUT}"
 

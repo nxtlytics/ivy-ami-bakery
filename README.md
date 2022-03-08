@@ -33,15 +33,22 @@ This requires:
 ```shell
 Bake AMI from Ansible roles using Packer
 
- Usage: build.sh -p PROVIDER -i IMAGE -r REGIONS -m MULTI-ACCOUNT_PROFILE [-v 'var1_name=value1,var2_name=value2'] [-d]
+ Usage: build.sh -p PROVIDER
+                 -i IMAGE
+                 -r REGION [-r OTHER_REGION]
+                 -m MULTI-ACCOUNT_PROFILE
+                 -v 'var1_name=value1' [-v 'var2_name=value2']
+                 -d
+                 --disable-azure-compatibility
 
  Options:
-   -v    variables and their values to pass to packer, key value pairs separated by commas
-   -p    provider to use (amazon|google|nocloud|...)
-   -r    regions to copy this image to (comma separated values)
-   -m    awscli profile that can assume role to list all accounts in this org
-   -i    image to provision
-   -d    enable debug mode
+   --disable-azure-compatibility  disable azure compatibility
+   -d,--debug                     enable debug mode
+   -i,--image                     image to provision
+   -m,--multiaccountprofile       awscli profile that can assume role to list all accounts in this org
+   -p,--provider                  provider to use (amazon|google|nocloud|...)
+   -r,--region                    regions to copy this image to (can be used multiple times)
+   -v,--packer-var                variables and their values to pass to packer, key value pairs (can be used multiple times)
 ```
 
 <!-- markdownlint-enable MD013 -->
