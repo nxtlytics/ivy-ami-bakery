@@ -1,0 +1,6 @@
+---
+#### Amazon Linux Specific Tweaks ####
+
+- name: enable dnsmasq2.85 via amazon-linux-extras
+  shell: |
+    amazon-linux-extras enable dnsmasq2.85

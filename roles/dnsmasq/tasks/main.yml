@@ -2,6 +2,10 @@
 # dnsmasq is used for providing split dns lookup services to bypass consul for internet dns queries.
 # socat is used for forwarding docker0 requests to consul to localhost for security,
 # since iptables forwarding to localhost is not well-supported especially in docker containers.
+
+# Import tasks for the specific OS being built
+- include: "{{ ansible_distribution }}.yml"
+
 - name: install packages
   # Install latest packages
   # noqa 403
