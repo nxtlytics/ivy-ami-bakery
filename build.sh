@@ -109,7 +109,9 @@ EOT
 function get_packer_vars() {
     local vars="${1:-""}"
     declare -a VARIABLES_TO_PASS ARGUMENTS_TO_PASS
-    mapfile -t VARIABLES_TO_PASS < <(tr ',' '\n' <<<"${vars}")
+    while IFS= read -r line; do
+      VARIABLES_TO_PASS+=("${line}")
+    done < <(tr ',' '\n' <<<"${vars}")
     if [[ "${#VARIABLES_TO_PASS[@]}" -gt '0' ]]; then
         for i in "${VARIABLES_TO_PASS[@]}"; do
             ARGUMENTS_TO_PASS+=("-var ${i}")
