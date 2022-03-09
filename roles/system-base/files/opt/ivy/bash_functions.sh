@@ -206,7 +206,11 @@ function setup_docker_storage() {
   sed -i '/${DEVICE}/d' /etc/fstab
   echo "${FSTAB}" >> /etc/fstab
 
-  systemctl enable --now docker
+  if check_systemctl_status 'docker'; then
+    systemctl restart docker
+  else
+    systemctl enable --now docker
+  fi
 }
 
 function update_env() {
@@ -253,6 +257,14 @@ function retry() {
     warn "Waiting for '${*}' to succeed, sleeping 5 seconds"
     sleep 5
   done
+}
+
+function check_systemctl_status() {
+  local UNIT="${1}"
+  if ! grep -q 'active' <(systemctl is-active "${UNIT}"); then
+    warn "${UNIT} status is NOT: active"
+    return 1
+  fi
 }
 
 case "$(get_cloud)" in

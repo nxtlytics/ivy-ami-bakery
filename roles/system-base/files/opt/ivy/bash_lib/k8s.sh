@@ -171,14 +171,6 @@ function get_k8s_node_status() {
     -l "${NODE_LABEL}" | grep -v NAME | awk '{ print $2 }'
 }
 
-function check_systemctl_status() {
-  local UNIT="${1}"
-  if ! grep -q 'active' <(systemctl is-active "${UNIT}"); then
-    warn "${UNIT} status is NOT: active"
-    return 1
-  fi
-}
-
 function check_dd_features() {
   local FEATURES_AS_STRING="${1}"
   declare -a FEATURES
