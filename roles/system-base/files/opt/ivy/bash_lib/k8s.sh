@@ -257,27 +257,27 @@ bare-metal. It also includes e2db, an ORM-like abstraction for working with etcd
   fi
   ask_to_continue "${ASK}"
 
-  echo -e "\e[31m ========================= \e[0m"
-  echo -e "\e[31m kube-apiserver is running \e[0m"
-  echo -e "\e[31m ========================= \e[0m"
+  echo -e "\e[31m ================================= \e[0m"
+  echo -e "\e[31m Confirm kube-apiserver is running \e[0m"
+  echo -e "\e[31m ================================= \e[0m"
   check_systemctl_status 'kube-apiserver'
   ask_to_continue "${ASK}"
 
-  echo -e "\e[31m ========================= \e[0m"
-  echo -e "\e[31m kube-scheduler is running \e[0m"
-  echo -e "\e[31m ========================= \e[0m"
+  echo -e "\e[31m ================================= \e[0m"
+  echo -e "\e[31m Confirm kube-scheduler is running \e[0m"
+  echo -e "\e[31m ================================= \e[0m"
   check_systemctl_status 'kube-scheduler'
   ask_to_continue "${ASK}"
 
-  echo -e "\e[31m ================================== \e[0m"
-  echo -e "\e[31m kube-controller-manager is running \e[0m"
-  echo -e "\e[31m ================================== \e[0m"
+  echo -e "\e[31m ========================================== \e[0m"
+  echo -e "\e[31m Confirm kube-controller-manager is running \e[0m"
+  echo -e "\e[31m ========================================== \e[0m"
   check_systemctl_status 'kube-controller-manager'
   ask_to_continue "${ASK}"
 
-  echo -e "\e[31m ===================================== \e[0m"
-  echo -e "\e[31m cloud-lifecycle-controller is running \e[0m"
-  echo -e "\e[31m ===================================== \e[0m"
+  echo -e "\e[31m ============================================= \e[0m"
+  echo -e "\e[31m Confirm cloud-lifecycle-controller is running \e[0m"
+  echo -e "\e[31m ============================================= \e[0m"
   check_systemctl_status 'cloud-lifecycle-controller'
   ask_to_continue "${ASK}"
 }

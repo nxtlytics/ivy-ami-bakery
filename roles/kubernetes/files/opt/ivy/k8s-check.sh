@@ -56,3 +56,7 @@ fi
 if [[ "${STACK_NAME}" =~ ^k8s.* ]]; then
   k8s_checks "${EXPLAIN}" "${ASK}"
 fi
+
+echo -e "\e[31m ================================================ \e[0m"
+echo -e "\e[31m if you got here all checks exited without errors \e[0m"
+echo -e "\e[31m ================================================ \e[0m"
