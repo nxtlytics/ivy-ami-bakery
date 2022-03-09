@@ -160,11 +160,18 @@
       - xfsprogs
       - tcpdump
       - systemd-devel
+      - yum-plugin-versionlock
     state: latest
     enablerepo:
       - datadog
       - epel
       - newrelic-infra
+
+- name: lock package to a version
+  shell:
+    cmd: yum versionlock add {{ item }}
+  loop:
+    - "datadog-agent-{{ dd_version }}"
 
 - name: add datadog agent to the systemd-journal group
   user:
