@@ -245,7 +245,7 @@ bare-metal. It also includes e2db, an ORM-like abstraction for working with etcd
   #/opt/ivy/etcdctl.sh -w table endpoint status
   ETCD_LEADERS=()
   while IFS= read -r line; do
-    leader="$(cut -d ',' -f5 <(echo "${line}"|xargs))"
+    leader="$(cut -d ',' -f5 <(echo "${line}")|xargs)"
     if [[ "${leader}" == 'true' ]]; then
       endpoint="$(cut -d ',' -f1 <(echo "${line}"))"
       ETCD_LEADERS+=("${endpoint}")
