@@ -57,11 +57,16 @@
       - '*/etcdctl'
     remote_src: yes
 
-- name: copy etcdctl wrapper script
+- name: copy k8s ivy scripts
   copy:
-    src: opt/ivy/etcdctl.sh
-    dest: /opt/ivy/etcdctl.sh
+    src: opt/ivy/{{ item }}
+    dest: /opt/ivy/{{ item }}
     mode: 0755
+  loop:
+    - etcdctl.sh
+    - kubelet-default-labels.sh
+    - kubelet-provider-id.sh
+    - k8s-check.sh
 
 - name: download k8s server components
   get_url:
@@ -128,12 +133,6 @@
       - kube-scheduler
       - kubelet
 
-- name: copy kubelet-default-labels script
-  copy:
-    src: opt/ivy/kubelet-default-labels.sh
-    dest: /opt/ivy/kubelet-default-labels.sh
-    mode: 0755
-
 - name: make /etc/kubernetes skeleton
   file:
     name: /etc/kubernetes/{{ item }}
@@ -167,12 +166,6 @@
   copy:
     src: etc/kubernetes/kubelet/config.yaml
     dest: /etc/kubernetes/kubelet/config.yaml
-
-- name: copy kubelet-provider-id script
-  copy:
-    src: opt/ivy/kubelet-provider-id.sh
-    dest: /opt/ivy/kubelet-provider-id.sh
-    mode: 0755
 
 - name: make /var/lib/kubelet skeleton
   file:
