@@ -13,14 +13,14 @@
     gpgcheck: no
 
 - name: Remove kernel-headers and kernel-tools
-  yum:
+  package:
     name:
       - kernel-headers
       - kernel-tools
     state: absent
 
 - name: install kernel-ml >= {{ kernel_min }}
-  yum:
+  package:
     name:
       - "kernel-ml >= {{ kernel_min }}"
       - "kernel-ml-devel >= {{ kernel_min }}"
@@ -28,6 +28,20 @@
       - "kernel-ml-tools-libs-devel >= {{ kernel_min }}"
     enablerepo: elrepo-kernel
     state: latest
+
+- name: install {{ ansible_distribution }} specific packages
+  package:
+    name:
+      - epel-release
+      - ntp
+      - yum-plugin-versionlock
+    state: latest
+
+- name: lock package to a version
+  shell:
+    cmd: yum versionlock add {{ item }}
+  loop:
+    - "datadog-agent-{{ dd_version }}"
 
 - name: update grub to point to latest kernel
   shell:

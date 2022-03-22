@@ -1,0 +1,13 @@
+---
+- name: install {{ ansible_distribution }} specific packages
+  package:
+    name:
+      - 'dnf-command(versionlock)'
+      - ntpsec
+    state: latest
+
+- name: lock package to a version
+  shell:
+    cmd: dnf versionlock {{ item }}
+  loop:
+    - "datadog-agent-{{ dd_version }}"

@@ -4,12 +4,12 @@
 # since iptables forwarding to localhost is not well-supported especially in docker containers.
 
 # Import tasks for the specific OS being built
-- include: "{{ ansible_distribution }}.yml"
+- include_tasks: "{{ ansible_distribution }}.yml"
 
 - name: install packages
   # Install latest packages
   # noqa 403
-  yum:
+  package:
     name:
       - dnsmasq
       - socat

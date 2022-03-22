@@ -4,7 +4,7 @@
     state: present
 
 - name: install packages
-  yum:
+  package:
     name:
       - "https://github.com/rabbitmq/erlang-rpm/releases/download/v{{ erlang_version }}/erlang-{{ erlang_version }}-1.el7.x86_64.rpm"
       - "https://github.com/rabbitmq/rabbitmq-server/releases/download/v{{ rabbitmq_version }}/rabbitmq-server-{{ rabbitmq_version }}-1.el7.noarch.rpm"

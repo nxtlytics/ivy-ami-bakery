@@ -11,19 +11,19 @@
     mode: 0644
 
 - name: install java8 and new relic integration
-  yum:
+  package:
     name:
       - java-1.8.0-openjdk-headless
       - nri-cassandra
     state: latest
 
 - name: remove openjdk-7
-  yum:
+  package:
     name: java-1.7.0-openjdk
     state: removed
 
 - name: install apache cassandra 3.11.5
-  yum:
+  package:
     name:
       - https://archive.apache.org/dist/cassandra/redhat/311x/cassandra-3.11.5-1.noarch.rpm
       - https://archive.apache.org/dist/cassandra/redhat/311x/cassandra-tools-3.11.5-1.noarch.rpm
