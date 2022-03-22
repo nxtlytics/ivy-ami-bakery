@@ -4,6 +4,7 @@
     name:
       - 'dnf-command(versionlock)'
       - dnf-plugins-core
+      - kernel-devel-matched
       - ntpsec
     state: latest
 

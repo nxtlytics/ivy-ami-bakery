@@ -137,7 +137,6 @@
       - iproute-tc
       - iptraf
       - jq
-      - kernel-devel-matched
       - less
       - make
       - mdadm
