@@ -5,7 +5,7 @@
 - name: install packages
   # Install latest packages
   # noqa 403
-  yum:
+  package:
     name:
       - dnsmasq
       - socat
@@ -27,10 +27,10 @@
       - "/etc/dhclient.conf"
       skip: True  # skippable if not using dhcp
 
-- include: consul.yml
+- include_tasks: consul.yml
 
 # skip vault for now
-#- include: vault.yml
+#- include_tasks: vault.yml
 
 - name: copy init files
   copy: src=etc/systemd/system/ dest=/etc/systemd/system/

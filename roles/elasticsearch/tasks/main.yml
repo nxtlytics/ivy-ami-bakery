@@ -1,5 +1,5 @@
 - name: install openjdk-8 & elasticsearch
-  yum:
+  package:
     name:
       - java-1.8.0-openjdk-headless
       - "https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-{{ elasticsearch_version }}-x86_64.rpm"
@@ -7,7 +7,7 @@
     state: present
 
 - name: remove openjdk-7
-  yum:
+  package:
     name: java-1.7.0-openjdk
     state: removed
 

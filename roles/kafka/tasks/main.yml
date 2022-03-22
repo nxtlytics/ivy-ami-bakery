@@ -1,11 +1,11 @@
 ---
 - name: install openjdk-8
-  yum:
+  package:
     name: java-1.8.0-openjdk-headless
     state: present
 
 - name: remove openjdk-7
-  yum:
+  package:
     name: java-1.7.0-openjdk
     state: removed
 

@@ -1,9 +1,9 @@
 ---
 # Import tasks for the specific OS being built
-- include: "{{ ansible_distribution }}.yml"
+- include_tasks: "{{ ansible_distribution }}.yml"
 
 - name: install rsyslog output modules
-  yum:
+  package:
     name: "{{ item }}"
     state: latest
   loop:

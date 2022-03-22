@@ -1,11 +1,11 @@
 ---
 - name: add mesosphere repositories
-  yum:
+  package:
     name: "http://repos.mesosphere.com/el/7/noarch/RPMS/mesosphere-el-repo-7-2.noarch.rpm"
 
 # TODO: Use newer zookeeper from somewhere other than mesosphere (3.5 has improvements!)
 - name: install java, mesos, marathon, & chronos
-  yum:
+  package:
     name:
       - java-1.8.0-openjdk
       - mesos-1.9.0

@@ -4,7 +4,7 @@
   shell: "amazon-linux-extras enable docker"
 
 - name: install docker
-  yum:
+  package:
     name: docker
     state: latest
 
