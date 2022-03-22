@@ -3,6 +3,7 @@
   package:
     name:
       - 'dnf-command(versionlock)'
+      - dnf-plugins-core
       - ntpsec
     state: latest
 
