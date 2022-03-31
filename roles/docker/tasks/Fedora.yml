@@ -1,0 +1,19 @@
+---
+#### Fedora Specific ####
+- name: install docker repo
+  shell:
+    cmd: dnf config-manager --add-repo https://download.docker.com/linux/fedora/docker-ce.repo
+
+- name: install docker
+  package:
+    name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+    state: latest
+
+- name: set docker options
+  lineinfile:
+    dest: "/etc/sysconfig/docker"
+    regexp: "OPTIONS="
+    line: 'OPTIONS="--default-ulimit nofile=262144:262144 --bip 172.17.0.1/16 -G docker --log-driver json-file --log-opt max-size=300m --log-opt max-file=3"'
