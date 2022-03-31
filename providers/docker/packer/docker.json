@@ -1,0 +1,31 @@
+{
+    "variables": {
+        "image_name": "{{env `PACKER_IMAGE_NAME`}}",
+        "source_image": "{{env `PACKER_SOURCE_IMAGE`}}",
+        "ivy_tag": "{{env `PACKER_IVY_TAG`}}",
+        "enable_azure_compat": "{{env `PACKER_ENABLE_AZURE_COMPAT`}}"
+    },
+    "builders": [
+        {
+            "type": "docker",
+            "name": "{{user `image_name`}}:{{timestamp}}",
+            "image": "{{user `source_image`}}",
+            "commit": true
+        }
+    ],
+    "provisioners": [
+        {
+            "type": "shell",
+            "script": "./providers/docker/packer/prepare.sh"
+        },
+        {
+            "type": "ansible-local",
+            "playbook_file": "./providers/docker/images/{{user `image_name`}}/provision.yml",
+            "playbook_dir": "./roles",
+            "extra_arguments": [
+                "--extra-vars \"ivy_tag={{user `ivy_tag`}} enable_azure_compat={{user `enable_azure_compat`}}\""
+            ],
+            "clean_staging_directory": true
+        }
+    ]
+}

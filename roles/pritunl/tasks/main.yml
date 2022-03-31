@@ -1,6 +1,6 @@
 ---
 # Import tasks for the specific OS being built
-- include: "{{ ansible_distribution }}.yml"
+- include_tasks: "{{ ansible_distribution }}.yml"
 
 - name: trust pritunl key
   rpm_key:
@@ -8,17 +8,11 @@
     state: present
 
 - name: install packages
-  yum:
+  package:
     name:
       - "pritunl-{{ pritunl_version }}"
       - mongodb-org
     state: present
-
-- name: lock package to a version
-  shell:
-    cmd: yum versionlock add {{ item }}
-  loop:
-    - "pritunl-{{ pritunl_version }}"
 
 - name: disable pritunl and mongod on first boot
   systemd:

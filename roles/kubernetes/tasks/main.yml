@@ -18,7 +18,7 @@
       - https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
 
 - name: install k8s tools
-  yum:
+  package:
     name: "{{ item }}-{{ k8s_version }}"
     enablerepo: kubernetes
     state: latest
@@ -151,7 +151,7 @@
     group: kubernetes
 
 - name: install cloud-lifecycle-controller
-  yum:
+  package:
     name: "https://github.com/nxtlytics/cloud-lifecycle-controller/releases/download/{{ cloud_lifecycle_controller_version }}/cloud-lifecycle-controller_{{ cloud_lifecycle_controller_version }}_{{ ansible_architecture }}.rpm"
     state: latest
 
@@ -199,7 +199,7 @@
 # ec2-net-utils triggers an addition of all secondary IPs automatically which breaks aws-cni's expectations
 # and causes pods to be unable to communicate with the network as the pod's IP is assigned to the host incorrectly
 - name: remove ec2-net-utils as it conflicts with the AWS CNI
-  yum:
+  package:
     name: ec2-net-utils
     state: removed
 

@@ -1,6 +1,6 @@
 ---
 # Import tasks for the specific OS being built
-- include: "{{ ansible_distribution }}.yml"
+- include_tasks: "{{ ansible_distribution }}.yml"
 
 - name: create docker group
   group:

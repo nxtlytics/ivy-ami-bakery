@@ -1,6 +1,6 @@
 ---
 # Import tasks for the specific OS being built
-- include: "{{ ansible_distribution }}.yml"
+- include_tasks: "{{ ansible_distribution }}.yml"
 
 # Common to all distributions
 - name: ensuring limits.conf is up to date
@@ -58,15 +58,6 @@
     gpgcheck: yes
     repo_gpgcheck: no
 
-- name: add new relic infrastructure repo
-  yum_repository:
-    name: newrelic-infra
-    description: New Relic Infrastructure
-    baseurl: https://download.newrelic.com/infrastructure_agent/linux/yum/el/7/$basearch
-    gpgkey: https://download.newrelic.com/infrastructure_agent/gpg/newrelic-infra.gpg
-    gpgcheck: yes
-    repo_gpgcheck: yes
-
 - name: copy gostatsd systemd unit for new relic
   copy:
     src: etc/systemd/system/gostatsd.service
@@ -77,16 +68,28 @@
     src: etc/logrotate.d/syslog
     dest: /etc/logrotate.d/syslog
 
+- name: Check that /etc/logrotate.conf exists
+  stat:
+    path: /etc/logrotate.conf
+  register: logrotate_conf
+
 - name: remove dateext from logrotate
   lineinfile:
     dest: "/etc/logrotate.conf"
     regexp: "^dateext$"
     line: '#dateext'
+  when: logrotate_conf.stat.exists
+
+- name: Check that /etc/cron.daily/logrotate exists
+  stat:
+    path: /etc/cron.daily/logrotate
+  register: daily_logrotate
 
 - name: make logrotate hourly
   command:
     creates: "/etc/cron.hourly/logrotate"
     cmd: "mv /etc/cron.daily/logrotate /etc/cron.hourly/logrotate"
+  when: daily_logrotate.stat.exists
 
 - name: disable icmp redirect messages in cloud environments
   copy:
@@ -116,13 +119,8 @@
     - gostatsd
     - nextdevice
 
-- name: install epel
-  yum:
-    name: epel-release
-    state: latest
-
 - name: install utilities
-  yum:
+  package:
     name:
       - bcc
       - curl
@@ -139,15 +137,12 @@
       - iproute-tc
       - iptraf
       - jq
-      - "kernel-devel-{{ ansible_kernel }}"
       - less
       - make
       - mdadm
       - msr-tools
-      - newrelic-infra
       - nload
       - nmap-ncat
-      - ntp
       - nvme-cli
       - perf
       - rsync
@@ -160,18 +155,10 @@
       - xfsprogs
       - tcpdump
       - systemd-devel
-      - yum-plugin-versionlock
     state: latest
     enablerepo:
       - datadog
       - epel
-      - newrelic-infra
-
-- name: lock package to a version
-  shell:
-    cmd: yum versionlock add {{ item }}
-  loop:
-    - "datadog-agent-{{ dd_version }}"
 
 - name: add datadog agent to the systemd-journal group
   user:
@@ -179,17 +166,22 @@
     append: yes
     groups: systemd-journal
 
-- name: disable newrelic-infra and datadog-agent on first boot
+- name: Check that /.dockerenv exists
+  stat:
+    path: /.dockerenv
+  register: dockerenv
+
+- name: disable datadog-agent on first boot
   systemd:
     name: "{{ item }}"
     enabled: no
     state: stopped
   loop:
     - datadog-agent
-    - newrelic-infra
+  when: not dockerenv.stat.exists
 
 - name: install development tools
-  yum:
+  package:
     name: "@Development tools"
     state: present
 
@@ -206,7 +198,7 @@
     mode: 0755
 
 - name: perform system yum update
-  yum:
+  package:
     name: "*"
     state: latest
 

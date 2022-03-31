@@ -10,7 +10,7 @@ bold=$(tput bold)
 norm=$(tput sgr0)
 
 function get_latest_ami() {
-  local ami_name="$1"
+  local ami_name="${1}"
   #local region="${2:-"us-west-2"}"
   ami_id=$(aws ec2 describe-images \
                --owners "amazon" "self" \
@@ -57,10 +57,10 @@ function get_regions() {
 }
 
 function setup_env() {
-  local provider=$1
-  local image=$2
+  local provider="${1}"
+  local image="${2}"
   local regions="${3:-""}"
-  local multiaccountprofile=${4}
+  local multiaccountprofile="${4}"
   local enableazurecompat="${5}"
 
   # Source the defaults
@@ -74,7 +74,11 @@ function setup_env() {
   fi
 
   # Inherit from env file or default, not inlined below to prevent subshell from TRAP'ing exit code
-  PACKER_SOURCE_IMAGE="$(get_latest_ami "${PACKER_SOURCE_IMAGE_NAME}")"
+  if [[ "${provider}" == 'docker' ]]; then
+    PACKER_SOURCE_IMAGE="${PACKER_SOURCE_IMAGE_NAME}"
+  else
+    PACKER_SOURCE_IMAGE="$(get_latest_ami "${PACKER_SOURCE_IMAGE_NAME}")"
+  fi
   PACKER_IMAGE_USERS="$(get_aws_accounts_for_org "${multiaccountprofile}")"
   PACKER_IMAGE_REGIONS="$(get_regions "${regions}")"
   export PACKER_SOURCE_IMAGE
@@ -165,7 +169,7 @@ function validate_image() {
 }
 
 function join_by {
-  local IFS="$1"
+  local IFS="${1}"
   shift
   echo "${*}"
 }

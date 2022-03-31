@@ -16,6 +16,6 @@
 
 - name: lock package to a version
   shell:
-    cmd: yum versionlock add {{ item }}
+    cmd: dnf versionlock {{ item }}
   loop:
     - "pritunl-{{ pritunl_version }}"
