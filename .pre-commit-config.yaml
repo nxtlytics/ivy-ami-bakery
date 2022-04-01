@@ -18,7 +18,7 @@ repos:
     hooks:
       - id: shellcheck
         exclude: '.*\.sh\.j2'
-  - repo: git://github.com/igorshubovych/markdownlint-cli
+  - repo: https://github.com/igorshubovych/markdownlint-cli.git
     rev: v0.31.1
     hooks:
       - id: markdownlint-fix
