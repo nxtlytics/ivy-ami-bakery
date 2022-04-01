@@ -9,6 +9,12 @@ variable "ivy_tag" {
   description = "Tag prefix to use for all tag-related functions in the built image. Can be overridden with `set_ivy_tag` bash function"
 }
 
+variable "enable_azure_compat" {
+  type        = bool
+  default     = false
+  description = "Should azure compatibility be added to the image?"
+}
+
 variable "image_name" {
   type        = string
   description = "Image to build. Must exist in 'providers/<provider_name>/images"
@@ -108,9 +114,9 @@ build {
     # provision the machine with the given role
     playbook_file = "${local.provider_dir}/images/${var.image_name}/provision.yml"
     playbook_dir  = "./roles"
-    //    extra_arguments = [
-    //      "--extra-vars \"ivy_tag={{user `ivy_tag`}} enable_azure_compat={{user `enable_azure_compat`}}\""
-    //    ]
+    extra_arguments = [
+      "--extra-vars \"ivy_tag=${var.ivy_tag} enable_azure_compat=${var.enable_azure_compat}\""
+    ]
     clean_staging_directory = true
   }
 

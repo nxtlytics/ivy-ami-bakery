@@ -1,0 +1,6 @@
+---
+#### Fedora Specific Tweaks ####
+
+- name: no fedora specific tasks yet
+  shell: |
+    echo 'No fedora specific tasks yet'
