@@ -1,21 +1,4 @@
 ---
-- name: Check that /etc/yum.conf exists
-  stat:
-    path: /etc/yum.conf
-  register: etc_yum_conf
-
-- name: Disabling GPG Signature for dnf/yum
-  lineinfile:
-    dest: /etc/yum.conf
-    line: gpgcheck=0
-  when: etc_yum_conf.stat.exists
-
-- name: Creating /etc/yum.conf
-  copy:
-    dest: /etc/yum.conf
-    content: gpgcheck=0
-  when: not etc_yum_conf.stat.exists
-
 - name: install {{ ansible_distribution }} specific packages
   package:
     name:

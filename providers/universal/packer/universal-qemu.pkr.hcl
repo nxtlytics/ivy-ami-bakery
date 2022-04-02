@@ -123,7 +123,7 @@ build {
   provisioner "shell" {
     # generalize the machine after it is finished provisioning
     inline = [
-      "cloud-init --force clean"
+      "cloud-init clean -sl"
     ]
     # run command as root
     execute_command = "sudo sh -c '{{ .Vars }} {{ .Path }}'"
