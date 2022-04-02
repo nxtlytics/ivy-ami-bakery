@@ -1,4 +1,7 @@
 ---
+# Import tasks for the specific OS being built
+- include_tasks: "{{ ansible_distribution }}.yml"
+
 - name: create kubernetes system user
   user:
     name: kubernetes
@@ -149,11 +152,6 @@
     state: directory
     owner: kubernetes
     group: kubernetes
-
-- name: install cloud-lifecycle-controller
-  package:
-    name: "https://github.com/nxtlytics/cloud-lifecycle-controller/releases/download/{{ cloud_lifecycle_controller_version }}/cloud-lifecycle-controller_{{ cloud_lifecycle_controller_version }}_{{ ansible_architecture }}.rpm"
-    state: latest
 
 - name: make log dir for components
   file:
