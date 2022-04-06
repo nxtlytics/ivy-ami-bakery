@@ -23,6 +23,12 @@ mkdir -p "${SYSTEM_BASE_FILES}"
 function download_if_not_present() {
     local BINARY="${1}"
     local DOCKER_IMAGE="${2}"
+    declare -a CHMOD_COMMAND=('chmod')
+
+    if [[ "$EUID" -ne 0 ]]; then
+      CHMOD_COMMAND=('sudo' 'chmod')
+    fi
+
     if [[ -e "${SYSTEM_BASE_FILES}/${BINARY}" ]]; then
       echo "${BINARY} has been downloaded already, if you want to download a new version"
       echo "delete the current one at ${SYSTEM_BASE_FILES}/${BINARY}"
@@ -48,7 +54,7 @@ function download_if_not_present() {
         return 1
         ;;
     esac
-    chmod 0755 "${SYSTEM_BASE_FILES}/${BINARY}"
+    "${CHMOD_COMMAND[@]}" 0755 "${SYSTEM_BASE_FILES}/${BINARY}"
     echo "Deleting docker image since the same tag might be reused"
     docker rmi "${DOCKER_IMAGE}"
 }
