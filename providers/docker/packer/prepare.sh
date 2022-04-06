@@ -11,7 +11,9 @@ yum install -y wget python-rpm-macros python3-rpm python3-devel libffi libffi-de
 yum groupinstall -y 'Development Tools'
 
 # ansible expects python at /usr/bin/python NOT at /bin/python
-ln -s "$(command -v python3)" /usr/bin/python
+if [[ ! -e /usr/bin/python ]]; then
+  ln -s "$(command -v python3)" /usr/bin/python
+fi
 
 # Allow notty sudo
 sed -n -e '/Defaults.*requiretty/s/^/#/p' /etc/sudoers
@@ -20,4 +22,4 @@ sed -n -e '/Defaults.*requiretty/s/^/#/p' /etc/sudoers
 pip3 install --upgrade pip
 
 # Install ansible
-pip3 install --upgrade --trusted-host pypi.python.org ansible==5.4.0
+pip3 install --upgrade --trusted-host pypi.python.org ansible==5.6.0

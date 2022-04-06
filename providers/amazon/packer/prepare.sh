@@ -18,4 +18,4 @@ if [[ ! -f get-pip.py ]]; then
 fi
 
 # Install ansible
-pip3 install --upgrade --trusted-host pypi.python.org ansible==5.4.0
+pip3 install --upgrade --trusted-host pypi.python.org ansible==5.6.0
