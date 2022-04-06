@@ -15,5 +15,6 @@ jobs:
       - name: Run tests
         shell: bash
         run: |
+          export TERM='xterm-256color'
           chmod +x build.sh
           ./build.sh -p docker -i ivy-base
