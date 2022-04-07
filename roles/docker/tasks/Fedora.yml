@@ -1,19 +1,26 @@
 ---
 #### Fedora Specific ####
-- name: install docker repo
-  shell:
-    cmd: dnf config-manager --add-repo https://download.docker.com/linux/fedora/docker-ce.repo
-
-- name: install docker
+- name: install moby-engine
   package:
     name:
-      - docker-ce
-      - docker-ce-cli
-      - containerd.io
+      - moby-engine
     state: latest
 
 - name: set docker options
-  lineinfile:
+  copy:
+    content: |
+      # /etc/sysconfig/docker
+
+      # Modify these options if you want to change the way the docker daemon runs
+      OPTIONS="--selinux-enabled \
+        --log-driver=json-file \
+        --log-opt max-size=300m \
+        --log-opt max-file=3 \
+        --bip 172.17.0.1/16 \
+        -G docker
+        --live-restore \
+        --default-ulimit nofile=1024:1024 \
+        --init-path /usr/libexec/docker/docker-init \
+        --userland-proxy-path /usr/libexec/docker/docker-proxy \
+      "
     dest: "/etc/sysconfig/docker"
-    regexp: "OPTIONS="
-    line: 'OPTIONS="--default-ulimit nofile=262144:262144 --bip 172.17.0.1/16 -G docker --log-driver json-file --log-opt max-size=300m --log-opt max-file=3"'

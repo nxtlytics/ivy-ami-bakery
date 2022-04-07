@@ -1,0 +1,6 @@
+---
+- name: install cloud-lifecycle-controller
+  yum:
+    name: "https://github.com/nxtlytics/cloud-lifecycle-controller/releases/download/{{ cloud_lifecycle_controller_version }}/cloud-lifecycle-controller_{{ cloud_lifecycle_controller_version }}_{{ ansible_architecture }}.rpm"
+    disable_gpg_check: yes
+    state: latest

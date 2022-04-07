@@ -16,24 +16,6 @@
     home: /var/empty
     system: yes
 
-- name: create /opt/ivy/cloud-tools/(msr-cloud-tools|bpf-perf-tools-book)
-  file:
-    path: "{{ item }}"
-    state: directory
-  loop:
-    - /opt/ivy
-    - /opt/ivy/misc-tools
-    - /opt/ivy/misc-tools/msr-cloud-tools
-    - /opt/ivy/misc-tools/bpf-perf-tools-book
-
-- name: clone msr-cloud-tools and bpf-perf-tools
-  git:
-    repo: "{{ item.repo }}"
-    dest: "{{ item.dest }}"
-  loop:
-    - { repo: 'https://github.com/brendangregg/msr-cloud-tools.git', dest: '/opt/ivy/misc-tools/msr-cloud-tools' }
-    - { repo: 'https://github.com/brendangregg/bpf-perf-tools-book.git', dest: '/opt/ivy/misc-tools/bpf-perf-tools-book' }
-
 - name: install custom scripts
   copy:
     src: opt/ivy/
@@ -80,6 +62,11 @@
     line: '#dateext'
   when: logrotate_conf.stat.exists
 
+- name: Creates /etc/cron.daily
+  file:
+    path: /etc/cron.daily
+    state: directory
+
 - name: Check that /etc/cron.daily/logrotate exists
   stat:
     path: /etc/cron.daily/logrotate
@@ -122,6 +109,7 @@
 - name: install utilities
   package:
     name:
+      - git
       - bcc
       - curl
       - "datadog-agent-{{ dd_version }}"
@@ -159,6 +147,24 @@
     enablerepo:
       - datadog
       - epel
+
+- name: create /opt/ivy/cloud-tools/(msr-cloud-tools|bpf-perf-tools-book)
+  file:
+    path: "{{ item }}"
+    state: directory
+  loop:
+    - /opt/ivy
+    - /opt/ivy/misc-tools
+    - /opt/ivy/misc-tools/msr-cloud-tools
+    - /opt/ivy/misc-tools/bpf-perf-tools-book
+
+- name: clone msr-cloud-tools and bpf-perf-tools
+  git:
+    repo: "{{ item.repo }}"
+    dest: "{{ item.dest }}"
+  loop:
+    - { repo: 'https://github.com/brendangregg/msr-cloud-tools.git', dest: '/opt/ivy/misc-tools/msr-cloud-tools' }
+    - { repo: 'https://github.com/brendangregg/bpf-perf-tools-book.git', dest: '/opt/ivy/misc-tools/bpf-perf-tools-book' }
 
 - name: add datadog agent to the systemd-journal group
   user:
