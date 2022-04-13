@@ -20,8 +20,12 @@
     url: "https://us.download.nvidia.com/XFree86/Linux-x86_64/{{ nvidia_driver_version }}/NVIDIA-Linux-x86_64-{{ nvidia_driver_version }}.run"
     dest: "/root/NVIDIA-{{ nvidia_driver_version }}.run"
 
+- name: "Get system default kernel"
+  shell: "grubby --default-kernel"
+  register: system_kernel
+
 - name: "Install nvidia-{{ nvidia_driver_version }} driver"
-  shell: "sh /root/NVIDIA-{{ nvidia_driver_version }}.run --silent"
+  shell: "sh /root/NVIDIA-{{ nvidia_driver_version }}.run --silent --dkms -k {{ system_kernel.stdout }} --no-wine-files"
   register: nvidia_install_log
   environment:
     CC: "/bin/gcc10-gcc"
