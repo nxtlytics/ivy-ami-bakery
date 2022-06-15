@@ -32,7 +32,6 @@
 - name: install {{ ansible_distribution }} specific packages
   package:
     name:
-      - epel-release
       - ntp
       - yum-plugin-versionlock
     state: latest
@@ -54,6 +53,7 @@
   # noqa 301 305
   shell: |
     amazon-linux-extras enable epel
+    amazon-linux-extras install -y epel
     amazon-linux-extras enable BCC
 
 
