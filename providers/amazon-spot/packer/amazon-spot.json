@@ -36,10 +36,6 @@
 	      "device_name": "/dev/xvda",
               "volume_size": "{{user `volume_size`}}",
 	      "delete_on_termination": true
-            }],
-            "ami_block_device_mappings": [{
-	      "device_name": "/dev/sdb",
-	      "virtual_name": "ephemeral0"
             }]
         }
     ],

@@ -1,9 +1,7 @@
 #!/usr/bin/env bash
 set -x
-# grow partition
-sudo lsblk
-sudo xfs_growfs -d /
 # print disk info
+sudo lsblk
 sudo df -Th
 # Allow notty sudo
 sudo sed -n -e '/Defaults.*requiretty/s/^/#/p' /etc/sudoers
