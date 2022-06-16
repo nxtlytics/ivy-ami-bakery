@@ -5,29 +5,25 @@
       blacklist nouveau
       options nouveau modeset=0
 
-# Instructions from here: https://docs.nvidia.com/datacenter/tesla/tesla-installation-notes/index.html#centos7
-- name: "Install undeclared dependencies"
+- name: "Install GCCv10"
   package:
-    name:
-      - tar
-      - bzip2
-      - make
-      - automake
-      - gcc
-      - gcc-c++
-      - pciutils
-      - elfutils-libelf-devel
-      - libglvnd-devel
-      - bind-utils
+    name: gcc10.x86_64
+    state: present
 
-# Instructions from here: https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html#redhat-installation-network
-- name: "Add cuda repository"
-  yum_repository:
-    name: cuda-rhel7-x86_64
-    enabled: no
-    description: cuda-rhel7-x86_64
-    baseurl: https://developer.download.nvidia.com/compute/cuda/repos/rhel7/x86_64
-    gpgcheck: no
+- name: "Get system default kernel"
+  shell: "grubby --default-kernel"
+  register: system_kernel
+
+- name: "Download nvidia-{{ nvidia_driver_version }} driver"
+  get_url:
+    url: "https://us.download.nvidia.com/XFree86/Linux-x86_64/{{ nvidia_driver_version }}/NVIDIA-Linux-x86_64-{{ nvidia_driver_version }}.run"
+    dest: "/root/NVIDIA-{{ nvidia_driver_version }}.run"
+
+- name: "Install nvidia-{{ nvidia_driver_version }} driver"
+  shell: "sh /root/NVIDIA-{{ nvidia_driver_version }}.run --silent --dkms -k {{ system_kernel.stdout }} --no-wine-files"
+  environment:
+    CC: "/bin/gcc10-gcc"
+    CXX: "/bin/gcc10-gcc"
 
 # Instructions from here: https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html#id2
 - name: "Add libnvidia-container repository"
@@ -51,17 +47,27 @@
     repo_gpgcheck: yes
     gpgkey: https://nvidia.github.io/libnvidia-container/gpgkey
 
-# Instructions from here:
-# - https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html#redhat-installation-common
-# - https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html#id2
+# Instructions from here: https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html#id2
 - name: "Install cuda driver and nvidia-docker"
   package:
     name:
-      - "nvidia-driver-latest-dkms-{{ nvidia_driver_version }}"
-      - cuda
-      - cuda-drivers
       - nvidia-docker2
     enablerepo:
-      - cuda-rhel7-x86_64
       - libnvidia-container
     state: latest
+
+- name: "Restart docker"
+  systemd:
+    name: docker
+    state: restarted
+
+- name: "validate host driver"
+  shell: "nvidia-smi"
+  register: validate_nvidia_host
+- debug:
+    msg: "{{ validate_nvidia_host.stdout }}"
+- name: "validate docker driver"
+  shell: "docker run --rm --gpus all nvidia/cuda:11.6.0-runtime-centos7 nvidia-smi"
+  register: validate_nvidia_docker
+- debug:
+    msg: "{{ validate_nvidia_docker.stdout }}"
