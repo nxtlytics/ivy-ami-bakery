@@ -1,0 +1,61 @@
+{
+    "variables": {
+        "ami_name": "{{env `PACKER_IMAGE_NAME`}}",
+        "ami_users": "{{env `PACKER_IMAGE_USERS`}}",
+        "ami_regions": "{{env `PACKER_IMAGE_REGIONS`}}",
+        "source_ami": "{{env `PACKER_SOURCE_IMAGE`}}",
+        "volume_size": "{{env `PACKER_VOLUME_SIZE`}}",
+        "ivy_tag": "{{env `PACKER_IVY_TAG`}}",
+        "enable_azure_compat": "{{env `PACKER_ENABLE_AZURE_COMPAT`}}",
+	"spot_instance_type": "{{env `PACKER_SPOT_INSTANCE_TYPE`}}"
+    },
+    "builders": [
+        {
+            "type": "amazon-ebs",
+            "ami_virtualization_type": "hvm",
+	    "ssh_username": "ec2-user",
+            "source_ami": "{{user `source_ami`}}",
+            "ami_name": "{{user `ami_name`}}-{{timestamp}}",
+            "ami_users": "{{user `ami_users`}}",
+            "ami_regions": "{{user `ami_regions`}}",
+	    "vpc_filter": {
+	      "filters": {
+	        "tag:ivy:service": "VPC",
+		"isDefault": "false"
+	      }
+	    },
+	    "subnet_filter": {
+              "filters": {
+	        "tag:ivy:role": "private"
+	      },
+	      "most_free": true
+	    },
+	    "spot_instance_types": ["{{user `spot_instance_type`}}"],
+	    "spot_price": "auto" ,
+            "launch_block_device_mappings": [{
+	      "device_name": "/dev/xvda",
+              "volume_size": "{{user `volume_size`}}",
+	      "delete_on_termination": true
+            }],
+            "ami_block_device_mappings": [{
+	      "device_name": "/dev/sdb",
+	      "virtual_name": "ephemeral0"
+            }]
+        }
+    ],
+    "provisioners": [
+        {
+            "type": "shell",
+            "script": "./providers/amazon-spot/packer/prepare.sh"
+        },
+        {
+            "type": "ansible-local",
+            "playbook_file": "./providers/amazon-spot/images/{{user `ami_name`}}/provision.yml",
+            "playbook_dir": "./roles",
+            "extra_arguments": [
+                "--extra-vars \"ivy_tag={{user `ivy_tag`}} enable_azure_compat={{user `enable_azure_compat`}}\""
+            ],
+            "clean_staging_directory": true
+        }
+    ]
+}

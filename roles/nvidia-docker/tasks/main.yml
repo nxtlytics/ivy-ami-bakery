@@ -1,0 +1,67 @@
+- name: "Disable nouveau kernel module"
+  copy:
+    dest: /usr/lib/modprobe.d/nvidia-installer-disable-nouveau.conf
+    content: |
+      blacklist nouveau
+      options nouveau modeset=0
+
+# Instructions from here: https://docs.nvidia.com/datacenter/tesla/tesla-installation-notes/index.html#centos7
+- name: "Install undeclared dependencies"
+  package:
+    name:
+      - tar
+      - bzip2
+      - make
+      - automake
+      - gcc
+      - gcc-c++
+      - pciutils
+      - elfutils-libelf-devel
+      - libglvnd-devel
+      - bind-utils
+
+# Instructions from here: https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html#redhat-installation-network
+- name: "Add cuda repository"
+  yum_repository:
+    name: cuda-rhel7-x86_64
+    enabled: no
+    description: cuda-rhel7-x86_64
+    baseurl: https://developer.download.nvidia.com/compute/cuda/repos/rhel7/x86_64
+    gpgcheck: no
+
+# Instructions from here: https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html#id2
+- name: "Add libnvidia-container repository"
+  yum_repository:
+    name: libnvidia-container
+    enabled: no
+    description: libnvidia-container
+    baseurl: https://nvidia.github.io/libnvidia-container/stable/amzn2/$basearch
+    gpgcheck: no
+    repo_gpgcheck: yes
+    gpgkey: https://nvidia.github.io/libnvidia-container/gpgkey
+
+# Instructions from here: https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html#id2
+- name: "Add libnvidia-container-experimental repository"
+  yum_repository:
+    name: libnvidia-container-experimental
+    enabled: no
+    description: libnvidia-container-experimental
+    baseurl: https://nvidia.github.io/libnvidia-container/experimental/amzn2/$basearch
+    gpgcheck: no
+    repo_gpgcheck: yes
+    gpgkey: https://nvidia.github.io/libnvidia-container/gpgkey
+
+# Instructions from here:
+# - https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html#redhat-installation-common
+# - https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html#id2
+- name: "Install cuda driver and nvidia-docker"
+  package:
+    name:
+      - "nvidia-driver-latest-dkms-{{ nvidia_driver_version }}"
+      - cuda
+      - cuda-drivers
+      - nvidia-docker2
+    enablerepo:
+      - cuda-rhel7-x86_64
+      - libnvidia-container
+    state: latest
