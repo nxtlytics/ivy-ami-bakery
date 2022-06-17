@@ -41,7 +41,7 @@
     src: etc/dnsmasq.d/10-dnsmasq
     dest: /etc/dnsmasq.d/10-dnsmasq
 
-- name: consul setup file
+- name: coredns setup file
   copy:
     src: opt/ivy/set-dnsmasq-dhcp.sh
     dest: /opt/ivy/set-dnsmasq-dhcp.sh

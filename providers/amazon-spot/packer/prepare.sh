@@ -20,3 +20,8 @@ if [[ ! -f get-pip.py ]]; then
 fi
 # Install ansible
 sudo python3.8 -m pip install --upgrade --trusted-host pypi.python.org ansible==5.6.0
+# Update to kernel 5.15 if not on 5.15 already
+if ! grep -q '^5.15' <(uname -r); then
+  sudo amazon-linux-extras install -y kernel-5.15
+  sudo reboot now
+fi

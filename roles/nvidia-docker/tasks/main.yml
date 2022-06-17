@@ -1,3 +1,8 @@
+- name: "Remove nouveau kernel module"
+  community.general.modprobe:
+    name: nouveau
+    state: absent
+
 - name: "Disable nouveau kernel module"
   copy:
     dest: /usr/lib/modprobe.d/nvidia-installer-disable-nouveau.conf
@@ -10,9 +15,11 @@
     name: gcc10.x86_64
     state: present
 
-- name: "Get system default kernel"
-  shell: "grubby --default-kernel"
-  register: system_kernel
+- name: "Update cc to gcc10"
+  file:
+    src: /usr/bin/gcc10-gcc
+    dest: /usr/bin/cc
+    state: link
 
 - name: "Download nvidia-{{ nvidia_driver_version }} driver"
   get_url:
@@ -20,10 +27,7 @@
     dest: "/root/NVIDIA-{{ nvidia_driver_version }}.run"
 
 - name: "Install nvidia-{{ nvidia_driver_version }} driver"
-  shell: "sh /root/NVIDIA-{{ nvidia_driver_version }}.run --silent --dkms -k {{ system_kernel.stdout }} --no-wine-files"
-  environment:
-    CC: "/bin/gcc10-gcc"
-    CXX: "/bin/gcc10-gcc"
+  shell: "sh /root/NVIDIA-{{ nvidia_driver_version }}.run --silent --dkms --no-wine-files"
 
 # Instructions from here: https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html#id2
 - name: "Add libnvidia-container repository"
