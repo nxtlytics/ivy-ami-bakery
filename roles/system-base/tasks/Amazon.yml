@@ -26,12 +26,6 @@
   loop:
     - "datadog-agent-{{ dd_version }}"
 
-- name: update grub to point to latest kernel
-  shell:
-    cmd: |
-      grub2-set-default 0
-      grub2-mkconfig -o /boot/grub2/grub.cfg
-
 # Amazon SSM agent is unnecessary, we have consul and ansible.
 - name: disable amazon-ssm-agent
   systemd:
