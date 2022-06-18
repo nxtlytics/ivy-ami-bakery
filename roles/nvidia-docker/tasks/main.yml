@@ -52,7 +52,7 @@
     gpgkey: https://nvidia.github.io/libnvidia-container/gpgkey
 
 # Instructions from here: https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html#id2
-- name: "Install cuda driver and nvidia-docker"
+- name: "Install nvidia-docker"
   package:
     name:
       - nvidia-docker2
