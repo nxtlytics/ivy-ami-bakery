@@ -1,5 +1,5 @@
 - name: "Remove nouveau kernel module"
-  modprobe:
+  community.general.modprobe:
     name: nouveau
     state: absent
 

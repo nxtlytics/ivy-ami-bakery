@@ -161,7 +161,7 @@
       - epel
 
 - name: lock package to a version
-  yum_versionlock:
+  community.general.yum_versionlock:
     state: present
     name:
       - "datadog-agent-{{ dd_version }}"
