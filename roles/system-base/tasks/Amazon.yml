@@ -20,21 +20,9 @@
       - yum-plugin-versionlock
     state: latest
 
-- name: lock package to a version
-  shell:
-    cmd: yum versionlock add {{ item }}
-  loop:
-    - "datadog-agent-{{ dd_version }}"
-
 # Amazon SSM agent is unnecessary, we have consul and ansible.
 - name: disable amazon-ssm-agent
   systemd:
     name: amazon-ssm-agent
     enabled: no
     state: stopped
-
-- name: "List locked versions"
-  shell: "yum versionlock list"
-  register: yum_versionlock_list
-- debug:
-    msg: "{{ yum_versionlock_list.stdout }}"

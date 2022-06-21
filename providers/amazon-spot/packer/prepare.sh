@@ -21,7 +21,7 @@ if [[ ! -f get-pip.py ]]; then
     wget https://bootstrap.pypa.io/get-pip.py && python3.8 get-pip.py
 fi
 # Install ansible
-sudo python3.8 -m pip install --upgrade --trusted-host pypi.python.org ansible==5.6.0
+sudo python3.8 -m pip install --upgrade --trusted-host pypi.python.org ansible==6.0.0
 if ! grep -q '^5.15' <(uname -r) && grep -q 'Amazon Linux 2' /etc/os-release; then
   # Update to kernel 5.15 if not on 5.15 already
   sudo amazon-linux-extras install -y kernel-5.15
