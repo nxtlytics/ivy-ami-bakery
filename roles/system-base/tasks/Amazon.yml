@@ -32,3 +32,9 @@
     name: amazon-ssm-agent
     enabled: no
     state: stopped
+
+- name: "List locked versions"
+  shell: "yum versionlock list"
+  register: yum_versionlock_list
+- debug:
+    msg: "{{ yum_versionlock_list.stdout }}"
