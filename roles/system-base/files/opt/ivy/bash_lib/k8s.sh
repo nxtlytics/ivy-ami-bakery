@@ -178,7 +178,6 @@ function check_dd_features() {
   FEATURES=(
     'feature_apm_enabled: true'
     'feature_logs_enabled: true'
-    'feature_networks_enabled: true'
   )
   for feature in "${FEATURES[@]}"; do
     if ! grep -q "${feature}" <<<"${FEATURES_AS_STRING}"; then
