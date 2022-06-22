@@ -26,6 +26,10 @@
                 "--extra-vars \"ivy_tag={{user `ivy_tag`}} enable_azure_compat={{user `enable_azure_compat`}}\""
             ],
             "clean_staging_directory": true
+        },
+        {
+            "type": "shell",
+            "script": "./providers/docker/packer/tests.sh"
         }
     ]
 }
