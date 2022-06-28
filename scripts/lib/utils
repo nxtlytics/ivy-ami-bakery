@@ -49,26 +49,54 @@ function create_menu() {
 }
 
 function select_ami() {
+  local PREFIX="${1}"
   declare -a AMIS=()
   while IFS= read -r ami; do
     AMIS+=("${ami}")
-  done < <(get_amis "${TMP_DIR}")
+  done < <(get_amis "${PREFIX}")
   AMI="$(create_menu "${AMIS[@]+"${AMIS[@]}"}")"
   echo -n "${AMI}"
 }
 
 function get_amis() {
+  local PREFIX="${1}"
+  local QUERY
+  QUERY="Images[?starts_with(Name, \`${PREFIX}\`) == \`true\`]"
   declare -a AMIS=()
   while IFS= read -r ami; do
     if [[ -n ${ami} ]]; then
       AMIS+=("${ami}")
     fi
   done < <(aws ec2 describe-images --owners 'self' \
-             --output json | jq -r \
-             '.Images | sort_by(.CreationDate) | reverse | .[] | ([.Name,.ImageId,.CreationDate] | join(","))')
+             --output json --query "${QUERY}" | jq -r \
+             '. | sort_by(.CreationDate) | reverse | .[] | ([.Name,.ImageId,.CreationDate] | join(","))')
   msg_info "Found ${#AMIS[@]} AMI(s)"
   # https://stackoverflow.com/questions/7577052/bash-empty-array-expansion-with-set-u
   return_non_empty_array "${AMIS[@]+"${AMIS[@]}"}"
+}
+
+function get_aws_accounts_for_org() {
+  local PROFILE="${1:-"orgs"}"
+  declare -a ACCOUNT_IDS=()
+  local SELF_ACCOUNT_ID
+  SELF_ACCOUNT_ID=$(aws sts get-caller-identity \
+                        --query Account \
+                        --output text)
+  # shellcheck disable=SC2016
+  local start_query='. as $arr | del($arr[] | select(contains("'
+  local end_query='"))) | .[]'
+  while IFS= read -r accountid; do
+    if [[ -n "${accountid}" ]]; then
+      ACCOUNT_IDS+=("${accountid}")
+    fi
+  done < <(aws organizations list-accounts \
+             --query 'Accounts[*].Id' \
+             --output json \
+             --profile="${PROFILE}" \
+             | jq -rc \
+             "${start_query}${SELF_ACCOUNT_ID}${end_query}")
+  # https://stackoverflow.com/questions/7577052/bash-empty-array-expansion-with-set-u
+  return_non_empty_array "${ACCOUNT_IDS[@]+"${ACCOUNT_IDS[@]}"}"
 }
 
 function get_operatingsystem() {

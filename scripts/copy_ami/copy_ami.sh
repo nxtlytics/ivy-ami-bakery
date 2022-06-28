@@ -13,7 +13,7 @@ PADDING=$(printf %-${#THIS_SCRIPT}s " ")
 function usage () {
   echo "Usage:"
   echo "${THIS_SCRIPT} -r, --region-name <AWS region name. Examples: us-east-1, us-west-2. REQUIRED>"
-  echo "${PADDING} -f, --first <Use this flag to pick the first Auto Scaling Group>"
+  echo "${PADDING} -p, --prefix <AMI name prefix>"
   echo
   echo "Copy an AMI to another AWS region"
   exit 1
@@ -26,6 +26,11 @@ fi
 
 while [[ $# -gt 0 ]]; do
   case "${1}" in
+    -p|--prefix)
+      PREFIX="${2}"
+      shift # past argument
+      shift # past value
+      ;;
     -r|--region-name)
       REGION_NAME="${2}"
       shift # past argument
@@ -38,25 +43,11 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-if [[ -z ${REGION_NAME:-""} ]] ; then
+if [[ -z ${REGION_NAME:-""} ]] || [[ -z ${PREFIX:-""} ]]; then
   usage
 fi
 
-# Create temp directory
-TMP_DIR="$(create_temp_dir "${THIS_SCRIPT}")"
-function cleanup() {
-  echo "Deleting ${TMP_DIR}"
-  rm -rf "${TMP_DIR}"
-}
-# Make sure cleanup runs even if this script fails
-trap cleanup EXIT
-
-
-#ASG_FILE="$(select_asg "${STACK_NAME}" "${TMP_DIR}" "${FIRST}")"
-
-#get_user_data "${ASG_FILE}" "${TMP_DIR}"
-
-AMI="$(select_ami "${TMP_DIR}")"
+AMI="$(select_ami "${PREFIX}")"
 
 AMI_NAME="$(cut -d ',' -f1 <<<"${AMI}")"
 AMI_ID="$(cut -d ',' -f2 <<<"${AMI}")"
@@ -69,5 +60,26 @@ CURRENT_REGION="$(aws configure get region)"
 msg_info "Selected AMI_NAME is ${AMI_NAME} and its ID is ${AMI_ID}"
 msg_info "Current region is ${CURRENT_REGION}"
 
-aws --region "${REGION_NAME}" ec2 copy-image --name "${AMI_NAME}" \
-  --source-image-id "${AMI_ID}" --source-region "${CURRENT_REGION}" --dry-run
+NEW_IMAGE_ID="$(aws --region "${REGION_NAME}" ec2 copy-image --name "${AMI_NAME}" \
+                  --source-image-id "${AMI_ID}" --source-region "${CURRENT_REGION}" \
+                  --query 'ImageId' --output text)"
+
+msg_info "AMI_NAME ${AMI_NAME} in region ${REGION_NAME} has ID ${NEW_IMAGE_ID}"
+
+declare -a ACCOUNT_IDS=()
+while IFS= read -r a; do
+  ACCOUNT_IDS+=("${a}")
+done < <(get_aws_accounts_for_org "orgs")
+
+msg_info "These are the AWS Account IDs that will have access to ${NEW_IMAGE_ID}:"
+msg_info "${ACCOUNT_IDS[*]+"${ACCOUNT_IDS[*]}"}"
+
+msg_info "Waiting until ${NEW_IMAGE_ID} is ready"
+
+aws --region "${REGION_NAME}" ec2 wait image-available --image-ids "${NEW_IMAGE_ID}"
+
+aws --region "${REGION_NAME}" ec2 modify-image-attribute --image-id "${NEW_IMAGE_ID}" \
+  --attribute 'launchPermission' --operation-type 'add' \
+  --user-ids "${ACCOUNT_IDS[@]+"${ACCOUNT_IDS[@]}"}"
+
+msg_info "I'm done!"
