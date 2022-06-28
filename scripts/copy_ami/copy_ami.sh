@@ -13,7 +13,7 @@ PADDING=$(printf %-${#THIS_SCRIPT}s " ")
 function usage () {
   echo "Usage:"
   echo "${THIS_SCRIPT} -r, --region-name <AWS region name. Examples: us-east-1, us-west-2. REQUIRED>"
-  echo "${PADDING} -p, --prefix <AMI name prefix>"
+  echo "${PADDING} -p, --prefix <AMI name prefix. REQUIRED>"
   echo
   echo "Copy an AMI to another AWS region"
   exit 1
