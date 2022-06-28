@@ -1,0 +1,77 @@
+- name: "Remove nouveau kernel module"
+  community.general.modprobe:
+    name: nouveau
+    state: absent
+
+- name: "Disable nouveau kernel module"
+  copy:
+    dest: /usr/lib/modprobe.d/nvidia-installer-disable-nouveau.conf
+    content: |
+      blacklist nouveau
+      options nouveau modeset=0
+
+- name: "Install GCCv10"
+  package:
+    name: gcc10.x86_64
+    state: present
+
+- name: "Update cc to gcc10"
+  file:
+    src: /usr/bin/gcc10-gcc
+    dest: /usr/bin/cc
+    state: link
+
+- name: "Download nvidia-{{ nvidia_driver_version }} driver"
+  get_url:
+    url: "https://us.download.nvidia.com/XFree86/Linux-x86_64/{{ nvidia_driver_version }}/NVIDIA-Linux-x86_64-{{ nvidia_driver_version }}.run"
+    dest: "/root/NVIDIA-{{ nvidia_driver_version }}.run"
+
+- name: "Install nvidia-{{ nvidia_driver_version }} driver"
+  shell: "sh /root/NVIDIA-{{ nvidia_driver_version }}.run --silent --dkms --no-wine-files"
+
+# Instructions from here: https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html#id2
+- name: "Add libnvidia-container repository"
+  yum_repository:
+    name: libnvidia-container
+    enabled: no
+    description: libnvidia-container
+    baseurl: https://nvidia.github.io/libnvidia-container/stable/amzn2/$basearch
+    gpgcheck: no
+    repo_gpgcheck: yes
+    gpgkey: https://nvidia.github.io/libnvidia-container/gpgkey
+
+# Instructions from here: https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html#id2
+- name: "Add libnvidia-container-experimental repository"
+  yum_repository:
+    name: libnvidia-container-experimental
+    enabled: no
+    description: libnvidia-container-experimental
+    baseurl: https://nvidia.github.io/libnvidia-container/experimental/amzn2/$basearch
+    gpgcheck: no
+    repo_gpgcheck: yes
+    gpgkey: https://nvidia.github.io/libnvidia-container/gpgkey
+
+# Instructions from here: https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html#id2
+- name: "Install nvidia-docker"
+  package:
+    name:
+      - nvidia-docker2
+    enablerepo:
+      - libnvidia-container
+    state: latest
+
+- name: "Restart docker"
+  systemd:
+    name: docker
+    state: restarted
+
+- name: "validate host driver"
+  shell: "nvidia-smi"
+  register: validate_nvidia_host
+- debug:
+    msg: "{{ validate_nvidia_host.stdout }}"
+- name: "validate docker driver"
+  shell: "docker run --rm --gpus all nvidia/cuda:11.6.0-runtime-centos7 nvidia-smi"
+  register: validate_nvidia_docker
+- debug:
+    msg: "{{ validate_nvidia_docker.stdout }}"

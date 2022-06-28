@@ -22,4 +22,4 @@ sed -n -e '/Defaults.*requiretty/s/^/#/p' /etc/sudoers
 pip3 install --upgrade pip
 
 # Install ansible
-pip3 install --upgrade --trusted-host pypi.python.org ansible==5.6.0
+pip3 install --upgrade --trusted-host pypi.python.org ansible==6.0.0

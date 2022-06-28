@@ -62,3 +62,20 @@ $ AWS_PROFILE=your-profile ./build.sh \
 $ AWS_PROFILE=your-profile ./build.sh \
     -p amazon -i ivy-mesos
 ```
+
+## Common errors
+
+<!-- markdownlint-disable MD013 -->
+
+### `The provided credentials do not have permission to create the service-linked role for EC2 Spot Instances`
+
+<!-- markdownlint-enable MD013 -->
+
+As an aws administrator run the command below:
+
+```shell
+aws --profile=your-aws-profile iam create-service-linked-role \
+  --aws-service-name spot.amazonaws.com
+```
+
+Source: [here](https://stackoverflow.com/questions/64136679/error-the-provided-credentials-do-not-have-permission-to-create-the-service-lin)

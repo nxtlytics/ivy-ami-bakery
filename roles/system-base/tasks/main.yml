@@ -160,6 +160,19 @@
       - datadog
       - epel
 
+- name: lock package to a version
+  community.general.yum_versionlock:
+    state: present
+    name:
+      - "datadog-agent-{{ dd_version }}"
+
+- name: "List locked versions"
+  shell: "yum versionlock list"
+  register: yum_versionlock_list
+
+- debug:
+    msg: "{{ yum_versionlock_list.stdout }}"
+
 - name: add datadog agent to the systemd-journal group
   user:
     name: dd-agent
@@ -222,3 +235,9 @@
   pip:
     name:
       - azure-cli
+
+- name: "Validate datadog-agent-{{ dd_version }}"
+  shell: "datadog-agent version"
+  register: validate_datadog_version
+- debug:
+    msg: "{{ validate_datadog_version.stdout }}"
