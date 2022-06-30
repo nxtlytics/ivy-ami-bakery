@@ -33,6 +33,8 @@ function get_aws_accounts_for_org() {
   # shellcheck disable=SC2016
   local start_query='. as $arr | del($arr[] | select(contains("'
   local end_query='"))) | join(",")'
+  
+  
   account_ids=$(aws organizations list-accounts \
                     --query 'Accounts[*].Id' \
                     --output json \
