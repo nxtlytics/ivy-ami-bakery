@@ -14,6 +14,19 @@
       - mongodb-org
     state: present
 
+- name: lock package to a version
+  community.general.yum_versionlock:
+    state: present
+    name:
+      - "pritunl-{{ pritunl_version }}"
+
+- name: "List locked versions"
+  shell: "yum versionlock list"
+  register: yum_versionlock_list
+
+- debug:
+    msg: "{{ yum_versionlock_list.stdout }}"
+
 - name: disable pritunl and mongod on first boot
   systemd:
     name: "{{ item }}"

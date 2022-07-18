@@ -1,0 +1,15 @@
+---
+- name: Provision a machine
+  hosts: 127.0.0.1
+  user: ec2-user
+  become: yes
+  become_user: root
+  connection: local
+  vars:
+    enable_azure_compat: true
+  roles:
+    - system-base
+    - dnsmasq
+    - role: azure-compat
+      when: enable_azure_compat == "true"
+    - pritunl
