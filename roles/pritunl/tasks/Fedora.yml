@@ -13,9 +13,3 @@
     description: Pritunl Repository
     baseurl: https://repo.pritunl.com/stable/yum/amazonlinux/2/
     gpgcheck: yes
-
-- name: lock package to a version
-  shell:
-    cmd: dnf versionlock {{ item }}
-  loop:
-    - "pritunl-{{ pritunl_version }}"
