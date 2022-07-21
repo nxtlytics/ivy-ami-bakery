@@ -4,7 +4,7 @@
   user: ec2-user
   connection: local
   vars:
-    # this builds a 1.21.x compatible cluster AMI
+    # this builds a 1.22.x compatible cluster AMI
     k8s_version: "1.22.10"
     enable_azure_compat: true
   roles:
