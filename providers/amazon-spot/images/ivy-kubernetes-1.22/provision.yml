@@ -7,7 +7,7 @@
   connection: local
   vars:
     # this builds a 1.22.x compatible cluster AMI
-    k8s_version: "1.22.11"
+    k8s_version: "1.22.12"
     enable_azure_compat: true
   roles:
     - system-base
