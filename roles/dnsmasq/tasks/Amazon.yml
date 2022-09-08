@@ -4,3 +4,17 @@
 - name: enable dnsmasq2.85 via amazon-linux-extras
   shell: |
     amazon-linux-extras enable dnsmasq2.85
+
+- name: ensure local dnsmasq is used as a DNS server
+  lineinfile:
+    dest: /etc/dhcp/dhclient.conf
+    state: present
+    line: "prepend domain-name-servers 127.0.0.1;"
+    insertafter: "EOF"
+  register: dnsmasq_result
+
+- name: assert that the line was inserted at the end of /etc/dhcp/dhclient.conf
+  assert:
+    that:
+      - dnsmasq_result is changed
+      - "dnsmasq_result.msg == 'line added'"
